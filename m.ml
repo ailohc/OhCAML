@@ -72,7 +72,7 @@ let sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | MUL (eq, e2) -> raise NotImplemented
   | DIV (eq, e2) -> raise NotImplemented
   | ISZERO e -> raise NotImplemented
-  | READ -> raise NotImplemented
+  | READ -> (SInt (new_sym ()), pi)
   | IF (cond, e1, e2) -> raise NotImplemented
   | LET (x, e1, e2) -> raise NotImplemented
   | LETREC (f, x, e1, e2) -> raise NotImplemented
