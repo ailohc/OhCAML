@@ -18,7 +18,7 @@ and var = string
 type typ = TyInt | TyBool | TyFun of typ * typ | TyVar of tyvar
 and tyvar = string
 
-type equation_op = SADD | SSUB | SMUL | SDIV
+type arithmetic_op = SADD | SSUB | SMUL | SDIV
 and sym_value =
   (* value *)
   | Int of int
@@ -30,8 +30,8 @@ and sym_value =
   | SBool of id
   | SVar of id
   | SFun of id * typ * typ
-  (* equation *)
-  | SEqu of equation_op * sym_value * sym_value
+  (* arithmetic expression *)
+  | SExp of arithmetic_op * sym_value * sym_value
 and id = int
 and sym_env = (var * sym_value) list
 
