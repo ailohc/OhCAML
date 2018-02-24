@@ -28,6 +28,7 @@ and sym_value =
   (* symbol *)
   | SInt of id
   | SBool of id
+  | SVar of id
   | SFun of id * typ * typ
   (* equation *)
   | SEqu of equation_op * sym_value * sym_value
@@ -79,6 +80,13 @@ let sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | PROC (x, e) -> raise NotImplemented
   | CALL (e1, e2) -> raise NotImplemented
 
+
+let rec find_sym_var : sym_env-> var -> sym_env =
+  fun senv x ->
+  match senv with
+  | [] -> (x, SVar (new_sym()))::senv
+  | (y, v):: tl -> if y = x then senv else find_sym_var tl x
+
 (* environment generator *)
 let rec gen_senv : (var * typ) list -> sym_env -> sym_env
 = fun args r ->
@@ -90,7 +98,7 @@ let rec gen_senv : (var * typ) list -> sym_env -> sym_env
       | TyInt -> append r (x, SInt (new_sym ()))
       | TyBool -> append r (x, SBool (new_sym ()))
       | TyFun (t1, t2) -> append r (x, SFun (new_sym (), t1, t2))
-      | TyVar t -> raise NotImplemented
+      | TyVar t -> find_sym_var r x
     end in
     gen_senv tl r
   
