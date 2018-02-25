@@ -61,9 +61,10 @@ and path_cond = path_exp
 
 let default_path_cond = TRUE
 
+exception SyntaxError
 exception NotImplemented
 
-let sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
+let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
 = fun e env pi ->
   match e with
   | CONST n -> (Int n, pi)
@@ -78,7 +79,18 @@ let sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | LET (x, e1, e2) -> raise NotImplemented
   | LETREC (f, x, e1, e2) -> raise NotImplemented
   | PROC (x, e) -> raise NotImplemented
-  | CALL (e1, e2) -> raise NotImplemented
+  | CALL (e1, e2) ->
+    let (func, pi) = sym_eval e1 env pi in
+    begin match func with
+    | Fun (x, body, denv) ->
+      let (v, pi) = sym_eval e2 env pi in
+      sym_eval body (append denv (x, v)) pi
+    | FunRec (f, x, body, denv) ->
+      let (v, pi) = sym_eval e2 env pi in
+      sym_eval body (append (append denv (f, func)) (x, v)) pi
+    | SFun (id, t1, t2) -> raise NotImplemented
+    | _ -> raise SyntaxError
+    end
 
 let rec find_sym_var : sym_env-> var -> sym_env =
   fun senv x ->
