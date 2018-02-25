@@ -68,6 +68,11 @@ let sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   match e with
   | CONST n -> (Int n, pi)
   | VAR x -> (find env x, pi)
+  | SInt sn -> (SInt sn, pi)
+  | SBool sb -> (SBool sb, pi)
+  | SVar sx -> (SVar sx, pi)
+  | SFun (sarg, t1, t2) -> (*todo*)
+  | SExp (saop, s1, s2) -> (*todo*)
   | ADD (e1, e2) -> raise NotImplemented
   | SUB (eq, e2) -> raise NotImplemented
   | MUL (eq, e2) -> raise NotImplemented
