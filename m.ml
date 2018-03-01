@@ -117,7 +117,9 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | LET (x, e1, e2) ->
     let (v, pi) = sym_eval e1 env pi in
     sym_eval e2 (append env (x, v)) pi
-  | LETREC (f, x, e1, e2) -> raise NotImplemented (* TODO *)
+  | LETREC (f, x, e1, e2) ->
+    let func = FunRec(f, x, e1, env) in
+    sym_eval e2 (append env (f, func)) pi
   | PROC (x, e) -> (Fun (x, e, env), pi)
   | CALL (e1, e2) ->
     let (func, pi) = sym_eval e1 env pi in
