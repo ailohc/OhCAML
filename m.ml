@@ -61,6 +61,25 @@ and path_cond = path_exp
 
 let default_path_cond = TRUE
 
+let rec value2str v =
+  match v with
+  | Int n -> string_of_int n
+  | Bool b -> string_of_bool b
+  | Fun _ -> "fun" (* TODO *)
+  | FunRec _ -> "fun" (* TODO *)
+  | SInt id -> "alpha" ^ string_of_int id
+  | SBool id -> "beta" ^ string_of_int id
+  | SVar id -> "var" ^ string_of_int id
+  | SFun (id, _, _) -> "sym_fun" ^ string_of_int id
+  | SExp (aop, v1, v2) ->
+    begin
+      match aop with
+      | SADD -> value2str v1 ^ " + " ^ value2str v2
+      | SSUB -> value2str v1 ^ " - " ^ value2str v2
+      | SMUL -> value2str v1 ^ " * " ^ value2str v2
+      | SDIV -> value2str v1 ^ " / " ^ value2str v2
+    end
+
 exception DivisionByZero
 exception SyntaxError
 exception NotImplemented
