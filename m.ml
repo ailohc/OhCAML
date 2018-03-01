@@ -61,6 +61,13 @@ and path_cond = path_exp
 
 let default_path_cond = TRUE
 
+let rec typ2str t =
+  match t with
+  | TyInt -> "int"
+  | TyBool -> "bool"
+  | TyFun (t1, t2) -> typ2str t1 ^ " -> " typ2str t2
+  | TyVar x -> x
+
 let rec value2str v =
   match v with
   | Int n -> string_of_int n
@@ -70,7 +77,7 @@ let rec value2str v =
   | SInt id -> "alpha" ^ string_of_int id
   | SBool id -> "beta" ^ string_of_int id
   | SVar id -> "var" ^ string_of_int id
-  | SFun (id, _, _) -> "sym_fun" ^ string_of_int id
+  | SFun (id, t1, t2) -> "sym_fun" ^ string_of_int id ^ " (" ^ typ2str t1 ^ " -> " ^ typ2str t2 ^ ")"
   | SExp (aop, v1, v2) ->
     begin
       match aop with
