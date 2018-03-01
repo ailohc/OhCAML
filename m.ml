@@ -28,7 +28,7 @@ and sym_value =
   (* symbol *)
   | SInt of id
   | SBool of id
-  | SVar of id
+  | SVar of id (* ? *)
   | SFun of id * typ * typ
   (* arithmetic expression *)
   | SExp of arithmetic_op * sym_value * sym_value
@@ -69,7 +69,15 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   match e with
   | CONST n -> (Int n, pi)
   | VAR x -> (find env x, pi)
-  | ADD (e1, e2) -> raise NotImplemented
+  | ADD (e1, e2) ->
+    let (v1, pi) = sym_eval e1 env pi in
+    let (v2, pi) = sym_eval e2 env pi in
+    begin
+      match v1, v2 with
+      | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+      | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+      | _ -> (SExp (SADD, v1, v2), pi)
+    end
   | SUB (eq, e2) -> raise NotImplemented
   | MUL (eq, e2) -> raise NotImplemented
   | DIV (eq, e2) -> raise NotImplemented
@@ -81,15 +89,16 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | PROC (x, e) -> raise NotImplemented
   | CALL (e1, e2) ->
     let (func, pi) = sym_eval e1 env pi in
-    begin match func with
-    | Fun (x, body, denv) ->
-      let (v, pi) = sym_eval e2 env pi in
-      sym_eval body (append denv (x, v)) pi
-    | FunRec (f, x, body, denv) ->
-      let (v, pi) = sym_eval e2 env pi in
-      sym_eval body (append (append denv (f, func)) (x, v)) pi
-    | SFun (id, t1, t2) -> raise NotImplemented
-    | _ -> raise SyntaxError
+    begin
+      match func with
+      | Fun (x, body, denv) ->
+        let (v, pi) = sym_eval e2 env pi in
+        sym_eval body (append denv (x, v)) pi
+      | FunRec (f, x, body, denv) ->
+        let (v, pi) = sym_eval e2 env pi in
+        sym_eval body (append (append denv (f, func)) (x, v)) pi
+      | SFun (id, t1, t2) -> raise NotImplemented
+      | _ -> raise SyntaxError
     end
 
 let rec find_sym_var : sym_env-> var -> sym_env =
