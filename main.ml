@@ -17,11 +17,7 @@ let main () =
     	let lexbuf = Lexing.from_channel file_channel in
     	let pgm = Parser.program Lexer.start lexbuf in
 		try
-      print_endline "";
-      print_endline "= Program = ";
-      ignore (Sys.command ("cat " ^ !src));
-      print_endline "";
-      ignore (M.typeof pgm)
+      print_endline (M.value2str (M.run pgm))
 		with Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
 
 let _ = main ()
