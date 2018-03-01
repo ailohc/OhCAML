@@ -106,8 +106,8 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
       | Int n1, Int 0 -> raise DivisionByZero
-      | Int n1, Int n2 -> (Int (n1 + n2), pi)
-      | _ -> (SExp (SADD, v1, v2), pi)
+      | Int n1, Int n2 -> (Int (n1 / n2), pi)
+      | _ -> (SExp (SDIV, v1, v2), pi)
   | ISZERO e -> raise NotImplemented
   | READ -> (SInt (new_sym ()), pi)
   | IF (cond, e1, e2) -> raise NotImplemented
