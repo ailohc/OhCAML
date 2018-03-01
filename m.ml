@@ -120,6 +120,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | SInt n -> raise NotImplemented (*TODO*)
       | SExp (saop, sv1, sv2) -> raise NotImplemented (*TODO*) 
       | _ -> raise SyntaxError
+    end
   | READ -> (SInt (new_sym ()), pi)
   | IF (cond, e1, e2) ->
     let (b, pi) = sym_eval cond env pi in
