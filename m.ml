@@ -80,7 +80,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | Int n1, Int n2 -> (Int (n1 + n2), pi)
       | _ -> (SExp (SADD, v1, v2), pi)
     end
-  | SUB (eq, e2) -> 
+  | SUB (e1, e2) -> 
     let (v1, pi) = sym_eval e1 env pi in
     let (v2, pi) = sym_eval e2 env pi in
     begin
@@ -89,7 +89,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
       | Int n1, Int n2 -> (Int (n1 - n2), pi)
       | _ -> (SExp (SSUB, v1, v2), pi)
-  | MUL (eq, e2) -> 
+  | MUL (e1, e2) -> 
     let (v1, pi) = sym_eval e1 env pi in
     let (v2, pi) = sym_eval e2 env pi in
     begin
@@ -98,7 +98,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
       | Int n1, Int n2 -> (Int (n1 * n2), pi)
       | _ -> (SExp (SMUL, v1, v2), pi)
-  | DIV (eq, e2) -> 
+  | DIV (e1, e2) -> 
     let (v1, pi) = sym_eval e1 env pi in
     let (v2, pi) = sym_eval e2 env pi in
     begin
