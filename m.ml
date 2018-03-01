@@ -111,9 +111,22 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | Int n1, Int n2 -> (Int (n1 / n2), pi)
       | _ -> (SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0)))
     end
-  | ISZERO e -> raise NotImplemented (* TODO *)
+  | ISZERO e -> 
+    let (v, pi) = sym_eval e env pi in
+    begin
+      match v with
+      | Int 0 -> (true, AND(pi, EQUAL(v, Int 0)))
+      | Int _ -> (false, AND(pi, NOTEQ(v, Int 0)))
+      | _ -> raise NotImplemented (*TODO*)
   | READ -> (SInt (new_sym ()), pi)
-  | IF (cond, e1, e2) -> raise NotImplemented (* TODO *)
+  | IF (cond, e1, e2) ->
+    let (b, pi) = sym_eval cond env pi in
+    begin
+      match b with
+      | Bool b -> if b then sym_eval e1 env pi else sym_eval e2 env pi
+      | SBool x -> raise NotImplemented (* TODO *)
+      | _ -> raise SyntaxError
+    end
   | LET (x, e1, e2) ->
     let (v, pi) = sym_eval e1 env pi in
     sym_eval e2 (append env (x, v)) pi
