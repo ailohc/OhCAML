@@ -64,7 +64,6 @@ let default_path_cond = TRUE
 exception DivisionByZero
 exception SyntaxError
 exception NotImplemented
-exception DivisionByZero
 
 let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
 = fun e env pi ->
@@ -108,14 +107,15 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       match v1, v2 with
       | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-      | Int _, Int 0 -> raise DivisionByZero
+      | _, Int 0 -> raise DivisionByZero
       | Int n1, Int n2 -> (Int (n1 / n2), pi)
       | _ -> (SExp (SDIV, v1, v2), pi)
-  | ISZERO e -> raise NotImplemented
+    end
+  | ISZERO e -> raise NotImplemented (* TODO *)
   | READ -> (SInt (new_sym ()), pi)
-  | IF (cond, e1, e2) -> raise NotImplemented
-  | LET (x, e1, e2) -> raise NotImplemented
-  | LETREC (f, x, e1, e2) -> raise NotImplemented
+  | IF (cond, e1, e2) -> raise NotImplemented (* TODO *)
+  | LET (x, e1, e2) -> raise NotImplemented (* TODO *)
+  | LETREC (f, x, e1, e2) -> raise NotImplemented (* TODO *)
   | PROC (x, e) -> (Fun (x, e, env), pi)
   | CALL (e1, e2) ->
     let (func, pi) = sym_eval e1 env pi in
@@ -127,7 +127,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | FunRec (f, x, body, denv) ->
         let (v, pi) = sym_eval e2 env pi in
         sym_eval body (append (append denv (f, func)) (x, v)) pi
-      | SFun (id, t1, t2) -> raise NotImplemented
+      | SFun (id, t1, t2) -> raise NotImplemented (* TODO *)
       | _ -> raise SyntaxError
     end
 
