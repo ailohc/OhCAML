@@ -41,6 +41,11 @@ let main () =
     	let pgm = Parser.program Lexer.start lexbuf in
 		try
       print_endline (value2str (run pgm))
-		with Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
+        with e ->
+            match e with
+            | Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
+            | DivisionByZero -> print_endline (!src ^ "/ by Zero")
+            | SyntaxError -> print_endline (!src ^ ": Syntax Error")
+            | _ -> print_endline (!src ^ ": Unknown Error")
 
 let _ = main ()

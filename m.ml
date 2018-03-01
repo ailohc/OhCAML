@@ -65,7 +65,7 @@ let rec typ2str t =
   match t with
   | TyInt -> "int"
   | TyBool -> "bool"
-  | TyFun (t1, t2) -> typ2str t1 ^ " -> " typ2str t2
+  | TyFun (t1, t2) -> typ2str t1 ^ " -> " ^ typ2str t2
   | TyVar x -> x
 
 let rec value2str v =
