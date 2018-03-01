@@ -113,7 +113,14 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
     end
   | ISZERO e -> raise NotImplemented (* TODO *)
   | READ -> (SInt (new_sym ()), pi)
-  | IF (cond, e1, e2) -> raise NotImplemented (* TODO *)
+  | IF (cond, e1, e2) ->
+    let (b, pi) = sym_eval cond env pi in
+    begin
+      match b with
+      | Bool b -> if b then sym_eval e1 else sym_eval e2
+      | SBool x -> raise NotImplemented (* TODO *)
+      | _ -> raise SyntaxError
+    end
   | LET (x, e1, e2) ->
     let (v, pi) = sym_eval e1 env pi in
     sym_eval e2 (append env (x, v)) pi
