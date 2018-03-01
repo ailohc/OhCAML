@@ -76,6 +76,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       match v1, v2 with
       | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+      | Int n1, Int n2 -> (Int (n1 + n2), pi)
       | _ -> (SExp (SADD, v1, v2), pi)
     end
   | SUB (eq, e2) -> raise NotImplemented
@@ -86,7 +87,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | IF (cond, e1, e2) -> raise NotImplemented
   | LET (x, e1, e2) -> raise NotImplemented
   | LETREC (f, x, e1, e2) -> raise NotImplemented
-  | PROC (x, e) -> raise NotImplemented
+  | PROC (x, e) -> (Fun (x, e, env), pi)
   | CALL (e1, e2) ->
     let (func, pi) = sym_eval e1 env pi in
     begin
