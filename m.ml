@@ -64,6 +64,7 @@ let default_path_cond = TRUE
 exception DivisionByZero
 exception SyntaxError
 exception NotImplemented
+exception DivisionByZero
 
 let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
 = fun e env pi ->
@@ -80,7 +81,11 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | Int n1, Int n2 -> (Int (n1 + n2), pi)
       | _ -> (SExp (SADD, v1, v2), pi)
     end
+<<<<<<< HEAD
   | SUB (e1, e2) ->
+=======
+  | SUB (eq, e2) -> 
+>>>>>>> d225c524cfe497bcd12c914feac0a64b05b3f6d8
     let (v1, pi) = sym_eval e1 env pi in
     let (v2, pi) = sym_eval e2 env pi in
     begin
@@ -89,8 +94,12 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
       | Int n1, Int n2 -> (Int (n1 - n2), pi)
       | _ -> (SExp (SSUB, v1, v2), pi)
+<<<<<<< HEAD
     end
   | MUL (e1, e2) ->
+=======
+  | MUL (eq, e2) -> 
+>>>>>>> d225c524cfe497bcd12c914feac0a64b05b3f6d8
     let (v1, pi) = sym_eval e1 env pi in
     let (v2, pi) = sym_eval e2 env pi in
     begin
@@ -99,18 +108,28 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
       | Int n1, Int n2 -> (Int (n1 * n2), pi)
       | _ -> (SExp (SMUL, v1, v2), pi)
+<<<<<<< HEAD
     end
   | DIV (e1, e2) ->
+=======
+  | DIV (eq, e2) -> 
+>>>>>>> d225c524cfe497bcd12c914feac0a64b05b3f6d8
     let (v1, pi) = sym_eval e1 env pi in
     let (v2, pi) = sym_eval e2 env pi in
     begin
       match v1, v2 with
       | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
       | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+<<<<<<< HEAD
       | _, Int 0 -> raise DivisionByZero
       | Int n1, Int n2 -> (Int (n1 / n2), pi)
       | _ -> (SExp (SDIV, v1, v2), pi)
     end
+=======
+      | Int n1, Int 0 -> raise DivisionByZero
+      | Int n1, Int n2 -> (Int (n1 / n2), pi)
+      | _ -> (SExp (SDIV, v1, v2), pi)
+>>>>>>> d225c524cfe497bcd12c914feac0a64b05b3f6d8
   | ISZERO e -> raise NotImplemented
   | READ -> (SInt (new_sym ()), pi)
   | IF (cond, e1, e2) -> raise NotImplemented
