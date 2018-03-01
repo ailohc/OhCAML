@@ -28,8 +28,7 @@ let rec typ2str t =
   | TyVar x -> x
 
 (* value *)
-type arithmetic_op = SADD | SSUB | SMUL | SDIV
-and sym_value =
+type sym_value =
   (* value *)
   | Int of int
   | Bool of bool
@@ -42,6 +41,7 @@ and sym_value =
   | SFun of id * typ * typ
   (* arithmetic expression *)
   | SExp of arithmetic_op * sym_value * sym_value
+and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
 
