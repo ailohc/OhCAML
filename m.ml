@@ -63,6 +63,7 @@ let default_path_cond = TRUE
 
 exception SyntaxError
 exception NotImplemented
+exception DivisionByZero
 
 let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
 = fun e env pi ->
@@ -79,9 +80,34 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
       | Int n1, Int n2 -> (Int (n1 + n2), pi)
       | _ -> (SExp (SADD, v1, v2), pi)
     end
-  | SUB (eq, e2) -> raise NotImplemented
-  | MUL (eq, e2) -> raise NotImplemented
-  | DIV (eq, e2) -> raise NotImplemented
+  | SUB (eq, e2) -> 
+    let (v1, pi) = sym_eval e1 env pi in
+    let (v2, pi) = sym_eval e2 env pi in
+    begin
+      match v1, v2 with
+      | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+      | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+      | Int n1, Int n2 -> (Int (n1 - n2), pi)
+      | _ -> (SExp (SSUB, v1, v2), pi)
+  | MUL (eq, e2) -> 
+    let (v1, pi) = sym_eval e1 env pi in
+    let (v2, pi) = sym_eval e2 env pi in
+    begin
+      match v1, v2 with
+      | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+      | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+      | Int n1, Int n2 -> (Int (n1 * n2), pi)
+      | _ -> (SExp (SMUL, v1, v2), pi)
+  | DIV (eq, e2) -> 
+    let (v1, pi) = sym_eval e1 env pi in
+    let (v2, pi) = sym_eval e2 env pi in
+    begin
+      match v1, v2 with
+      | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+      | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+      | Int n1, Int 0 -> raise DivisionByZero
+      | Int n1, Int n2 -> (Int (n1 + n2), pi)
+      | _ -> (SExp (SADD, v1, v2), pi)
   | ISZERO e -> raise NotImplemented
   | READ -> (SInt (new_sym ()), pi)
   | IF (cond, e1, e2) -> raise NotImplemented
