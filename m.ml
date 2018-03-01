@@ -115,10 +115,9 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
     let (v, pi) = sym_eval e env pi in
     begin
       match v with
-      | Int 0 -> (Bool true, AND(pi, EQUAL(v, Int 0)))
-      | Int _ -> (Bool false, AND(pi, NOTEQ(v, Int 0)))
-      | SInt n -> raise NotImplemented (*TODO*)
-      | SExp (saop, sv1, sv2) -> raise NotImplemented (*TODO*) 
+      | Int 0 -> (Bool true, pi)
+      | Int _ -> (Bool false, pi)
+      | SInt _ | SExp _ -> raise NotImplemented (*TODO*)
       | _ -> raise SyntaxError
     end
   | READ -> (SInt (new_sym ()), pi)
