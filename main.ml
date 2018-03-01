@@ -18,8 +18,11 @@ let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
   solve r1 r2
 
 (* simple symbolic eval *)
-let run : program -> sym_value
-= fun pgm -> (fun (v, _) -> v) (sym_eval pgm empty_env default_path_cond) 
+let run : program -> unit
+= fun pgm ->
+    let (v, pi) = sym_eval pgm empty_env default_path_cond in
+    print_endline ("value: " ^ value2str v);
+    print_endline ("path condition: " ^ cond2str pi)
 
 let main () =
     let print_code = ref false in
@@ -40,7 +43,7 @@ let main () =
     	let lexbuf = Lexing.from_channel file_channel in
     	let pgm = Parser.program Lexer.start lexbuf in
 		try
-      print_endline (value2str (run pgm))
+            run pgm
         with e ->
             match e with
             | Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")

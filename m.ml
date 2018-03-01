@@ -1,3 +1,4 @@
+(* expression *)
 type program = exp
 and exp = 
   | CONST of int
@@ -15,9 +16,18 @@ and exp =
   | CALL of exp * exp
 and var = string
 
+(* type *)
 type typ = TyInt | TyBool | TyFun of typ * typ | TyVar of tyvar
 and tyvar = string
 
+let rec typ2str t =
+  match t with
+  | TyInt -> "int"
+  | TyBool -> "bool"
+  | TyFun (t1, t2) -> typ2str t1 ^ " -> " ^ typ2str t2
+  | TyVar x -> x
+
+(* value *)
 type arithmetic_op = SADD | SSUB | SMUL | SDIV
 and sym_value =
   (* value *)
@@ -46,28 +56,6 @@ let rec find env x =
   | (y, v)::tl -> if y = x then v else find tl x
 let append env (x, v) = (x, v)::env
 
-type path_exp =
-  (* boolean exp *)
-  | TRUE
-  | FALSE
-  (* boolean op *)
-  | AND of path_exp * path_exp
-  | OR of path_exp * path_exp
-  | NOT of path_exp
-  (* symbolic equation *)
-  | EQUAL of sym_value * sym_value
-  | NOTEQ of sym_value * sym_value
-and path_cond = path_exp
-
-let default_path_cond = TRUE
-
-let rec typ2str t =
-  match t with
-  | TyInt -> "int"
-  | TyBool -> "bool"
-  | TyFun (t1, t2) -> typ2str t1 ^ " -> " ^ typ2str t2
-  | TyVar x -> x
-
 let rec value2str v =
   match v with
   | Int n -> string_of_int n
@@ -86,6 +74,31 @@ let rec value2str v =
       | SMUL -> value2str v1 ^ " * " ^ value2str v2
       | SDIV -> value2str v1 ^ " / " ^ value2str v2
     end
+
+type path_exp =
+  (* boolean exp *)
+  | TRUE
+  | FALSE
+  (* boolean op *)
+  | AND of path_exp * path_exp
+  | OR of path_exp * path_exp
+  | NOT of path_exp
+  (* symbolic equation *)
+  | EQUAL of sym_value * sym_value
+  | NOTEQ of sym_value * sym_value
+and path_cond = path_exp
+
+let default_path_cond = TRUE
+
+let rec cond2str pi =
+  match pi with
+  | TRUE -> "true"
+  | FALSE -> "false"
+  | AND (e1, e2) -> "(" ^ cond2str e1 ^ " and " ^ cond2str e2 ^ ")"
+  | OR (e1, e2) -> "(" ^ cond2str e1 ^ " or " ^ cond2str e2 ^ ")"
+  | NOT e -> "!(" ^ cond2str e ^ ")"
+  | EQUAL (v1, v2) -> "(" ^ value2str v1 ^ " = " ^ value2str v2 ^ ")"
+  | NOTEQ (v1, v2) -> "(" ^ value2str v1 ^ " != " ^ value2str v2 ^ ")"
 
 exception DivisionByZero
 exception SyntaxError
