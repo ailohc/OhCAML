@@ -114,7 +114,9 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
   | ISZERO e -> raise NotImplemented (* TODO *)
   | READ -> (SInt (new_sym ()), pi)
   | IF (cond, e1, e2) -> raise NotImplemented (* TODO *)
-  | LET (x, e1, e2) -> raise NotImplemented (* TODO *)
+  | LET (x, e1, e2) ->
+    let (v, pi) = sym_eval e1 env pi in
+    sym_eval e2 (append env (x, v) pi)
   | LETREC (f, x, e1, e2) -> raise NotImplemented (* TODO *)
   | PROC (x, e) -> (Fun (x, e, env), pi)
   | CALL (e1, e2) ->
