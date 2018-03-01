@@ -192,18 +192,3 @@ let rec gen_senv : (var * typ) list -> sym_env -> sym_env
   
 let solve : (sym_value * path_cond) -> (sym_value * path_cond) -> bool
 = fun t1 t2 -> false (* TODO *)
-
-let prog_equal : exp -> exp -> bool
-= fun p1 p2 ->
-  init_sym_cnt ();
-  let r1 = sym_eval p1 empty_env default_path_cond in
-  let r2 = sym_eval p2 empty_env default_path_cond in
-  solve r1 r2
-
-let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
-= fun f1 args1 f2 args2 ->
-  let env1 = init_sym_cnt (); gen_senv args1 empty_env in
-  let r1 = sym_eval f1 env1 default_path_cond in
-  let env2 = init_sym_cnt (); gen_senv args2 empty_env in
-  let r2 = sym_eval f2 env2 default_path_cond in
-  solve r1 r2

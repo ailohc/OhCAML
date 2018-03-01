@@ -1,5 +1,22 @@
 open M
 
+(* equality comparison between programs *)
+let prog_equal : exp -> exp -> bool
+= fun p1 p2 ->
+  init_sym_cnt ();
+  let r1 = sym_eval p1 empty_env default_path_cond in
+  let r2 = sym_eval p2 empty_env default_path_cond in
+  solve r1 r2
+
+(* equality comparison between functions *)
+let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
+= fun f1 args1 f2 args2 ->
+  let env1 = init_sym_cnt (); gen_senv args1 empty_env in
+  let r1 = sym_eval f1 env1 default_path_cond in
+  let env2 = init_sym_cnt (); gen_senv args2 empty_env in
+  let r2 = sym_eval f2 env2 default_path_cond in
+  solve r1 r2
+
 (* simple symbolic eval *)
 let run : program -> sym_value
 = fun pgm -> (fun (v, _) -> v) (sym_eval pgm empty_env default_path_cond) 
