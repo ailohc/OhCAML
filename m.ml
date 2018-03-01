@@ -56,7 +56,8 @@ let rec find env x =
   | (y, v)::tl -> if y = x then v else find tl x
 let append env (x, v) = (x, v)::env
 
-let rec value2str v =
+let rec value2str : sym_value -> string
+= fun v ->
   match v with
   | Int n -> string_of_int n
   | Bool b -> string_of_bool b
@@ -90,7 +91,34 @@ and path_cond = path_exp
 
 let default_path_cond = TRUE
 
-let rec cond2str pi =
+let rec simplify_cond : path_exp -> path_exp
+= fun pi ->
+  match pi with
+  | TRUE -> TRUE
+  | FALSE -> FALSE
+  | AND (e1, e2) ->
+    let v1 = simplify_cond e1 in
+    let v2 = simplify_cond e2 in
+    begin
+      match v1, v2 with
+      | TRUE, _ -> v2
+      | FALSE, _ -> FALSE
+      | _ -> AND (v1, v2)
+    end
+  | OR (e1, e2) ->
+    let v1 = simplify_cond e1 in
+    let v2 = simplify_cond e2 in
+    begin
+      match v1, v2 with
+      | TRUE, _ -> TRUE
+      | FALSE, _ -> v2
+      | _ -> OR (v1, v2)
+    end
+  | NOT e -> NOT (simplify_cond e)
+  | EQUAL _ | NOTEQ _ -> pi
+
+let rec cond2str : path_exp -> string
+= fun pi ->
   match pi with
   | TRUE -> "true"
   | FALSE -> "false"

@@ -22,7 +22,7 @@ let run : program -> unit
 = fun pgm ->
     let (v, pi) = sym_eval pgm empty_env default_path_cond in
     print_endline ("value: " ^ value2str v);
-    print_endline ("path condition: " ^ cond2str pi)
+    print_endline ("path condition: " ^ cond2str (simplify_cond pi))
 
 let main () =
     let print_code = ref false in
