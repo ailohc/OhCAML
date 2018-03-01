@@ -69,10 +69,10 @@ let rec value2str v =
   | SExp (aop, v1, v2) ->
     begin
       match aop with
-      | SADD -> value2str v1 ^ " + " ^ value2str v2
-      | SSUB -> value2str v1 ^ " - " ^ value2str v2
-      | SMUL -> value2str v1 ^ " * " ^ value2str v2
-      | SDIV -> value2str v1 ^ " / " ^ value2str v2
+      | SADD -> "(" ^ value2str v1 ^ " + " ^ value2str v2 ^ ")"
+      | SSUB -> "(" ^ value2str v1 ^ " - " ^ value2str v2 ^ ")"
+      | SMUL -> "(" ^ value2str v1 ^ " * " ^ value2str v2 ^ ")"
+      | SDIV -> "(" ^ value2str v1 ^ " / " ^ value2str v2 ^ ")"
     end
 
 type path_exp =
