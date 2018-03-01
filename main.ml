@@ -1,3 +1,9 @@
+open M
+
+(* simple symbolic eval *)
+let run : program -> sym_value
+= fun pgm -> (fun (v, _) -> v) (sym_eval pgm empty_env default_path_cond) 
+
 let main () =
     let print_code = ref false in
     let src = ref "" in
@@ -17,7 +23,7 @@ let main () =
     	let lexbuf = Lexing.from_channel file_channel in
     	let pgm = Parser.program Lexer.start lexbuf in
 		try
-      print_endline (M.value2str (M.run pgm))
+      print_endline (value2str (run pgm))
 		with Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
 
 let _ = main ()

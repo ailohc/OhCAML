@@ -207,7 +207,3 @@ let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
   let env2 = init_sym_cnt (); gen_senv args2 empty_env in
   let r2 = sym_eval f2 env2 default_path_cond in
   solve r1 r2
-  
-(* driver code *)
-let run : program -> sym_value
-= fun pgm -> (fun (v,_) -> v) (sym_eval pgm empty_env default_path_cond) 
