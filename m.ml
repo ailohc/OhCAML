@@ -117,7 +117,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond)
     let (b, pi) = sym_eval cond env pi in
     begin
       match b with
-      | Bool b -> if b then sym_eval e1 else sym_eval e2
+      | Bool b -> if b then sym_eval e1 env pi else sym_eval e2 env pi
       | SBool x -> raise NotImplemented (* TODO *)
       | _ -> raise SyntaxError
     end
