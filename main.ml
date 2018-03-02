@@ -20,9 +20,19 @@ let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
 (* simple symbolic eval *)
 let run : program -> unit
 = fun pgm ->
-    let (v, pi) = sym_eval pgm empty_env default_path_cond in
-    print_endline ("value: " ^ value2str v);
-    print_endline ("path condition: " ^ cond2str (simplify_cond pi))
+    let rec print_aux : (sym_value * path_cond) list -> int -> unit
+    = fun l cnt ->
+        match l with
+        | [] -> print_newline ()
+        | (v, pi)::tl ->
+            print_endline ("<" ^ string_of_int cnt ^ ">");
+            print_endline ("value: " ^ value2str v);
+            print_endline ("path condition: " ^ cond2str (simplify_cond pi));
+            print_newline ();
+            print_aux tl (cnt + 1)
+    in
+    let r = sym_eval pgm empty_env default_path_cond in
+    print_aux r 1
 
 let main () =
     let print_code = ref false in
@@ -49,6 +59,5 @@ let main () =
             | Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
             | DivisionByZero -> print_endline (!src ^ "/ by Zero")
             | SyntaxError -> print_endline (!src ^ ": Syntax Error")
-            | _ -> print_endline (!src ^ ": Unknown Error")
 
 let _ = main ()
