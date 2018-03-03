@@ -79,7 +79,7 @@ let rec value2str : sym_value -> string
       | SMUL -> "(" ^ value2str v1 ^ " * " ^ value2str v2 ^ ")"
       | SDIV -> "(" ^ value2str v1 ^ " / " ^ value2str v2 ^ ")"
     end
-  | EoR f -> "Can't eval: fun " ^ f ^ "called more than " ^ string_of_int recursive_cnt ^ " times recursively"
+  | EoR f -> "Can't eval: fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
 
 type path_exp =
   (* boolean exp *)
