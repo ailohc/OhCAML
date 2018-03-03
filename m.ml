@@ -11,7 +11,7 @@ and exp =
   | READ
   | IF of exp * exp * exp
   | LET of var * exp * exp
-  | LETREC of var * var * exp * exp             
+  | LETREC of var * var * exp * exp
   | PROC of var * exp
   | CALL of exp * exp
 and var = string
@@ -33,7 +33,7 @@ type sym_value =
   | Int of int
   | Bool of bool
   | Fun of var * exp * sym_env
-  | FunRec of var * var * exp * sym_env
+  | FunRec of var * var * exp * sym_env * int
   (* symbol *)
   | SInt of id
   | SBool of id
@@ -41,9 +41,13 @@ type sym_value =
   | SFun of id * typ * typ
   (* arithmetic expression *)
   | SExp of arithmetic_op * sym_value * sym_value
+  (* end of recursive *)
+  | EoR of var
 and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
+
+let recursive_cnt = 5
 
 let sym_cnt = ref 0
 let init_sym_cnt () = sym_cnt := 0
@@ -75,6 +79,7 @@ let rec value2str : sym_value -> string
       | SMUL -> "(" ^ value2str v1 ^ " * " ^ value2str v2 ^ ")"
       | SDIV -> "(" ^ value2str v1 ^ " / " ^ value2str v2 ^ ")"
     end
+  | EoR f -> "Can't eval: fun " ^ f ^ "called more than " ^ string_of_int recursive_cnt ^ "times recursively"
 
 type path_exp =
   (* boolean exp *)
@@ -150,11 +155,11 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
         let l2 = sym_eval e2 env pi in
         sym_eval_aux l2 (
           fun v2 pi ->
-            match v1, v2 with
-            | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
-            | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-            | Int n1, Int n2 -> [(Int (n1 + n2), pi)]
-            | _ -> [(SExp (SADD, v1, v2), pi)]
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | Int n1, Int n2 -> [(Int (n1 + n2), pi)]
+          | _ -> [(SExp (SADD, v1, v2), pi)]
         )
     )
   | SUB (e1, e2) ->
@@ -164,11 +169,11 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
         let l2 = sym_eval e2 env pi in
         sym_eval_aux l2 (
           fun v2 pi ->
-            match v1, v2 with
-            | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
-            | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-            | Int n1, Int n2 -> [(Int (n1 - n2), pi)]
-            | _ -> [(SExp (SSUB, v1, v2), pi)]
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | Int n1, Int n2 -> [(Int (n1 - n2), pi)]
+          | _ -> [(SExp (SSUB, v1, v2), pi)]
         )
     )
   | MUL (e1, e2) ->
@@ -192,33 +197,33 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
         let l2 = sym_eval e2 env pi in
         sym_eval_aux l2 (
           fun v2 pi ->
-            match v1, v2 with
-            | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
-            | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-            | _, Int 0 -> raise DivisionByZero
-            | Int n1, Int n2 -> [(Int (n1 / n2), pi)]
-            | _ -> [(SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0)))]
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | _, Int 0 -> raise DivisionByZero
+          | Int n1, Int n2 -> [(Int (n1 / n2), pi)]
+          | _ -> [(SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0)))]
         )
     )
   | ISZERO e -> 
     let l = sym_eval e env pi in
     sym_eval_aux l (
       fun v pi ->
-        match v with
-        | Int 0 -> [(Bool true, pi)]
-        | Int _ -> [(Bool false, pi)]
-        | SInt _ | SExp _ -> [(Bool true, AND(pi, EQUAL(v, Int 0))); (Bool false, AND(pi, NOTEQ(v, Int 0)))]
-        | _ -> raise SyntaxError
+      match v with
+      | Int 0 -> [(Bool true, pi)]
+      | Int _ -> [(Bool false, pi)]
+      | SInt _ | SExp _ -> [(Bool true, AND(pi, EQUAL(v, Int 0))); (Bool false, AND(pi, NOTEQ(v, Int 0)))]
+      | _ -> raise SyntaxError
     )
   | READ -> [(SInt (new_sym ()), pi)]
   | IF (cond, e1, e2) ->
     let l = sym_eval cond env pi in
     sym_eval_aux l (
       fun b pi ->
-        match b with
-        | Bool b -> if b then sym_eval e1 env pi else sym_eval e2 env pi
-        | SBool _ -> (sym_eval e1 env (AND (pi, EQUAL (b, Bool true))))@(sym_eval e2 env (AND (pi, EQUAL (b, Bool false))))
-        | _ -> raise SyntaxError
+      match b with
+      | Bool b -> if b then sym_eval e1 env pi else sym_eval e2 env pi
+      | SBool _ -> (sym_eval e1 env (AND (pi, EQUAL (b, Bool true))))@(sym_eval e2 env (AND (pi, EQUAL (b, Bool false))))
+      | _ -> raise SyntaxError
     )
   | LET (x, e1, e2) ->
     let l = sym_eval e1 env pi in
@@ -226,23 +231,31 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
       fun v pi -> sym_eval e2 (append env (x, v)) pi
     )
   | LETREC (f, x, e1, e2) -> (* TODO *)
-    let func = FunRec(f, x, e1, env) in
+    let func = FunRec(f, x, e1, env, recursive_cnt) in
     sym_eval e2 (append env (f, func)) pi
   | PROC (x, e) -> [(Fun (x, e, env), pi)]
   | CALL (e1, e2) ->
     let l = sym_eval e1 env pi in
     sym_eval_aux l (
       fun func pi ->
-        match func with
-        | Fun (x, body, denv) ->
-          let l = sym_eval e2 env pi in
-          sym_eval_aux l (
-            fun v pi -> sym_eval body (append denv (x, v)) pi
-          )
-        | FunRec (f, x, body, denv) ->
+      match func with
+      | Fun (x, body, denv) ->
+        let l = sym_eval e2 env pi in
+        sym_eval_aux l (
+          fun v pi -> sym_eval body (append denv (x, v)) pi
+        )
+      | FunRec (f, x, body, denv, cnt) ->
+        if cnt > 0
+        then
+          let func = FunRec (f, x, body, denv, cnt - 1) in
           let l = sym_eval e2 env pi in
           sym_eval_aux l (
             fun v pi -> sym_eval body (append (append denv (f, func)) (x, v)) pi
+          )
+        else
+          let l = sym_eval e2 env pi in
+          sym_eval_aux l (
+            fun v pi -> [(EoR f, pi)] (* TODO *)
           )
         | SFun (id, t1, t2) -> raise NotImplemented (* TODO *)
         | _ -> raise SyntaxError
