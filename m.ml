@@ -303,7 +303,8 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
             fun v pi -> [(EoR f, pi)]
           )
       | SFun (id, t1, t2) -> raise NotImplemented (* TODO *)
-      | _ -> print_endline (value2str func); raise SyntaxError
+      | EoR _ -> [(func, pi)]
+      | _ -> raise SyntaxError
     )
 
 let rec find_sym_var : sym_env-> var -> sym_env =
