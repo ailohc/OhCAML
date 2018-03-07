@@ -128,9 +128,3 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
       | EoR _ -> [(func, pi)]
       | _ -> raise SyntaxError
     )
-
-let rec find_sym_var : sym_env-> var -> sym_env =
-  fun senv x ->
-  match senv with
-  | [] -> (x, SVar (new_sym()))::senv
-  | (y, v):: tl -> if y = x then senv else find_sym_var tl x

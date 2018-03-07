@@ -1,5 +1,10 @@
 open Lang
-open Sym_eval
+
+let rec find_sym_var : sym_env-> var -> sym_env =
+  fun senv x ->
+  match senv with
+  | [] -> (x, SVar (new_sym()))::senv
+  | (y, v):: tl -> if y = x then senv else find_sym_var tl x
 
 (* environment generator *)
 let rec gen_senv : (var * typ) list -> sym_env -> sym_env
