@@ -1,4 +1,5 @@
-open M
+open Lang
+open Sym_eval
 
 (* equality comparison between programs *)
 let prog_equal : exp -> exp -> bool
