@@ -96,7 +96,8 @@ let rec simplify_val_aux : sym_value -> sym_value
     begin
       match v with
       | Int n -> Int (-n)
-      | Bool _ | Fun _ | FunRec _ | SInt _ | SBool _ | SVar _ | SFun _ -> raise (Failure "Not Integer Value") (* Should not reach heer *)
+      | Bool _ | Fun _ | FunRec _ | SBool _ | SVar _ | SFun _ -> raise (Failure "Not Integer Value") (* Should not reach heer *)
+      | SInt _ -> SMinus v
       | EoR _ -> v
       | SExp _ -> SMinus (simplify_val_aux v)
       | SMinus v -> v
