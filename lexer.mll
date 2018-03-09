@@ -15,6 +15,8 @@
                     ("letrec",LETREC);
                     ("read",READ);
                     ("proc",PROC);
+                    ("true", TRUE);
+                    ("false", FALSE);
                   ] 
 } 
 

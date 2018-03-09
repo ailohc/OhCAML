@@ -14,6 +14,8 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
 = fun e env pi ->
   match e with
   | CONST n -> [(Int n, pi)]
+  | TRUE -> [(Bool true, pi)]
+  | FALSE -> [(Bool false, pi)]
   | VAR x -> [(find env x, pi)]
   | ADD (e1, e2) ->
     let l1 = sym_eval e1 env pi in

@@ -2,6 +2,8 @@
 type program = exp
 and exp = 
   | CONST of int
+  | TRUE
+  | FALSE
   | VAR of var
   | ADD of exp * exp
   | SUB of exp * exp

@@ -29,6 +29,8 @@ program:
 
 exp:
     NUM { Lang.CONST $1 }
+  | TRUE { Lang.TRUE }
+  | FALSE { Lang.FALSE }
   | ID { Lang.VAR $1 }
   | exp PLUS exp  { Lang.ADD ($1,$3) }
   | exp MINUS exp  { Lang.SUB ($1,$3) }
