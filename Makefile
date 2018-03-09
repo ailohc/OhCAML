@@ -1,18 +1,18 @@
 all: run
 
-run: lang.cmo lexer.cmo parser.cmo sym_eval.cmo solve.cmo main.cmo
+run: lexer.cmo parser.cmo lang.cmo sym_eval.cmo solve.cmo main.cmo
 	ocamlc -o run lexer.cmo parser.cmo lang.cmo sym_eval.cmo solve.cmo main.cmo
 
 lang.cmo: lang.ml
 	ocamlc -c lang.ml
 
-sym_eval.cmo: sym_eval.ml
+sym_eval.cmo: lang.cmo sym_eval.ml
 	ocamlc -c sym_eval.ml
 
-solve.cmo: solve.ml
+solve.cmo: lang.cmo solve.ml
 	ocamlc -c solve.ml
 
-parser.ml: parser.mly sym_eval.cmo
+parser.ml: parser.mly lang.cmo sym_eval.cmo
 	ocamlyacc parser.mly
 
 parser.mli: parser.mly
@@ -24,7 +24,7 @@ parser.cmi: parser.mli
 parser.cmo: parser.ml parser.cmi
 	ocamlc -c parser.ml
 
-main.cmo : sym_eval.cmo main.ml
+main.cmo : lang.cmo solve.cmo sym_eval.cmo main.ml
 	ocamlc -c main.ml
 
 lexer.cmo: lexer.ml
