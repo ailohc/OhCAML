@@ -44,8 +44,9 @@ type sym_value =
   (* arithmetic expression *)
   | SExp of arithmetic_op * sym_value * sym_value
   | SMinus of sym_value
-  (* end of recursive *)
-  | EoR of var
+  (* error *)
+  | EoR of var (* end of recursive *)
+  | Error of string
 and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
@@ -69,7 +70,7 @@ let rec fix_point : 'a -> ('a -> 'a) -> 'a
 let rec simplify_val_aux : sym_value -> sym_value
 = fun v ->
   match v with
-  | Int _ | Bool _ | Fun _ | FunRec _ | SInt _ | SBool _ | SVar _ | SFun _ | EoR _ -> v
+  | Int _ | Bool _ | Fun _ | FunRec _ | SInt _ | SBool _ | SVar _ | SFun _ | EoR _ | Error _ -> v
   | SExp (aop, v1, v2) ->
     let v1, v2 = simplify_val_aux v1, simplify_val_aux v2 in
     begin
@@ -78,6 +79,7 @@ let rec simplify_val_aux : sym_value -> sym_value
         begin
           match v1, v2 with
           | EoR f, _ | _, EoR f -> EoR f
+          | Error s, _ | _, Error s -> Error s
           | _ -> v (* TODO *)
         end
       | SSUB -> SExp (SADD, v1, SMinus v2)
@@ -85,12 +87,14 @@ let rec simplify_val_aux : sym_value -> sym_value
         begin
           match v1, v2 with
           | EoR f, _ | _, EoR f -> EoR f
+          | Error s, _ | _, Error s -> Error s
           | _ -> v (* TODO *)
         end
       | SDIV ->
         begin
           match v1, v2 with
           | EoR f, _ | _, EoR f -> EoR f
+          | Error s, _ | _, Error s -> Error s
           | _ -> v (* TODO *)
         end
       end
@@ -101,6 +105,7 @@ let rec simplify_val_aux : sym_value -> sym_value
       | Bool _ | Fun _ | FunRec _ | SBool _ | SVar _ | SFun _ -> raise (Failure "Not Integer Value") (* Should not reach heer *)
       | SInt _ -> SMinus v
       | EoR _ -> v
+      | Error _ -> v
       | SExp _ -> SMinus (simplify_val_aux v)
       | SMinus v -> v
     end
@@ -129,6 +134,7 @@ let rec value2str : sym_value -> string
     end
   | SMinus v -> "(-" ^ value2str v ^ ")"
   | EoR f -> "Can't eval: fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
+  | Error s -> "Error: " ^ s
 
 type path_exp =
   (* boolean exp *)

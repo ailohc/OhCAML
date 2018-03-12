@@ -1,6 +1,5 @@
 open Lang
 
-exception DivisionByZero
 exception SyntaxError
 exception NotImplemented
 
@@ -69,9 +68,9 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | _, Int 0 -> raise DivisionByZero
+          | _, Int 0 -> [(Error "/ by zero", pi)]
           | Int n1, Int n2 -> [(Int (n1 / n2), pi)]
-          | _ -> [(SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0)))]
+          | _ -> [(SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0))); (Error "/ by zero", AND(pi, EQUAL(v2, Int 0)))]
         )
     )
   | ISZERO e -> 
@@ -99,7 +98,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
     sym_eval_aux l (
       fun v pi -> sym_eval e2 (append env (x, v)) pi
     )
-  | LETREC (f, x, e1, e2) -> (* TODO *)
+  | LETREC (f, x, e1, e2) ->
     let func = FunRec(f, x, e1, env, recursive_cnt) in
     sym_eval e2 (append env (f, func)) pi
   | PROC (x, e) -> [(Fun (x, e, env), pi)]
