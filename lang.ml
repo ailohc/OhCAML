@@ -29,6 +29,17 @@ let rec typ2str t =
   | TyFun (t1, t2) -> typ2str t1 ^ " -> " ^ typ2str t2
   | TyVar x -> x
 
+let rec replace_typ src from des =
+  match from with
+  | TyVar x ->
+    begin
+      match src with
+      | TyInt | TyBool -> src
+      | TyFun (t1, t2) -> TyFun (replace_typ t1 from des, replace_typ t2 from des)
+      | TyVar y -> if x = y then des else src
+    end
+  | _ -> raise (Failure "Not Type Variable")
+
 (* value *)
 type sym_value =
   (* value *)
@@ -44,6 +55,7 @@ type sym_value =
   (* arithmetic expression *)
   | SExp of arithmetic_op * sym_value * sym_value
   | SMinus of sym_value
+  | SFunApp of id * sym_value * typ
   (* error *)
   | EoR of var (* end of recursive *)
   | Error of string
@@ -108,7 +120,9 @@ let rec simplify_val_aux : sym_value -> sym_value
       | Error _ -> v
       | SExp _ -> SMinus (simplify_val_aux v)
       | SMinus v -> v
+      | _ -> SMinus v
     end
+  | _ -> v
 
 let simplify_val : sym_value -> sym_value
 = fun v -> fix_point v simplify_val_aux
@@ -133,6 +147,7 @@ let rec value2str : sym_value -> string
       | SDIV -> "(" ^ value2str v1 ^ " / " ^ value2str v2 ^ ")"
     end
   | SMinus v -> "(-" ^ value2str v ^ ")"
+  | SFunApp (id, v, t) -> "Sym_fun" ^ string_of_int id ^ "(" ^ value2str v ^ ")"
   | EoR f -> "Can't eval: fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
   | Error s -> "Error: " ^ s
 

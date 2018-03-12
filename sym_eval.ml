@@ -137,7 +137,22 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           sym_eval_aux l (
             fun v pi -> [(EoR f, pi)]
           )
-      | SFun (id, t1, t2) -> raise NotImplemented (* TODO *)
+      | SFun (id, t1, t2) ->
+        let l = sym_eval e2 env pi in
+        sym_eval_aux l (
+          fun v pi ->
+          match t1, v with
+          | TyInt, Int _ | TyInt, SInt _ | TyInt, SExp _ | TyInt, SMinus _ -> [(SFunApp (id, v, t2), pi)]
+          | TyBool, Bool _ | TyBool, SBool _ -> [(SFunApp (id, v, t2), pi)]
+          | TyFun (ty1, ty2), Fun _ | TyFun (ty1, ty2), FunRec _ | TyFun (ty1, ty2), SFun _ -> [(SFunApp (id, v, t2), pi)] (* TODO *)
+          | TyVar _, Int _ | TyVar _, SInt _ | TyVar _, SExp _ | TyVar _, SMinus _ ->[(SFunApp (id, v, replace_typ t2 t1 TyInt), pi)]
+          | TyVar _, Bool _ | TyVar _, SBool _ -> [(SFunApp (id, v, replace_typ t2 t1 TyBool), pi)]
+          | TyVar _, Fun _ | TyVar _, FunRec _ -> [(SFunApp (id, v, t2), pi)] (* TODO *)
+          | TyVar _, SFun (_, from, des) -> [(SFunApp (id, v, TyFun(from, des)), pi)]
+          | TyVar _, SFunApp (_, _, t) -> [(SFunApp (id, v, replace_typ t2 t1 t), pi)]
+          | _, SFunApp (_, _, t) -> if t = t1 then [(SFunApp (id, v, t2), pi)] else raise SyntaxError
+          | _ -> raise SyntaxError
+        )
       | EoR _ | Error _ -> [(func, pi)]
       | _ -> raise SyntaxError
     )
