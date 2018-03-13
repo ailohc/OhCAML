@@ -63,7 +63,7 @@ and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
 
-let recursive_cnt = 5
+let recursive_cnt = 4
 
 let sym_cnt = ref 0
 let init_sym_cnt () = sym_cnt := 0
