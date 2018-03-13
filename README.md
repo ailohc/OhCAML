@@ -1,3 +1,9 @@
 # OhCAML
 
-OhCAML is equivalent Checking Assistant for ML
+OhCAML is Checking Assistant for ML
+
+## Build
+./build
+
+## Clean
+./build clean
