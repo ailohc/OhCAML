@@ -4,10 +4,10 @@ OhCAML is Checking Assistant for ML
 
 ## Build
 ```
-./build
+$ ./build
 ```
 
 ## Clean
 ```
-./build clean
+$ ./build clean
 ```
