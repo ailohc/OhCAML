@@ -61,5 +61,6 @@ let main () =
             | Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
             | SyntaxError -> print_endline (!src ^ ": Syntax Error")
             | Failure s -> print_endline (!src ^ ": " ^ s)
+            | _ -> print_endline (": Unkown Error")
 
 let _ = main ()
