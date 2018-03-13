@@ -1,4 +1,5 @@
 open Lang
+open Z3
 
 let rec find_sym_var : sym_env-> var -> sym_env =
   fun senv x ->

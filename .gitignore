@@ -1,9 +1,3 @@
 # ignore compiled files
-*.cmx
-*.cmi
-parser.mli
-parser.ml
-lexer.ml
-run
-*.o
-*.cmo
+_build/
+main.native
