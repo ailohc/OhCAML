@@ -1,7 +1,6 @@
 open Lang
 
 exception SyntaxError
-exception NotImplemented
 
 let divByZero = Error "/ by zero"
 
