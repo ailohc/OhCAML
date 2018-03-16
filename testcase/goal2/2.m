@@ -10,3 +10,4 @@ let check = proc (a) (proc (b) (proc (c) (
         else
             c * c - a * a - b * b = 0
 )))
+in ((((check read) read) read)
