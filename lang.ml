@@ -10,6 +10,10 @@ and exp =
   | MUL of exp * exp
   | DIV of exp * exp
   | ISZERO of exp
+  | LT of exp * exp
+  | LE of exp * exp
+  | GT of exp * exp
+  | GE of exp * exp
   | READ
   | IF of exp * exp * exp
   | LET of var * exp * exp

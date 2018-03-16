@@ -93,6 +93,14 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
       | EoR _ | Error _ -> [(v, pi)]
       | _ -> raise SyntaxError
     )
+  | LT (e1, e2) -> (*e1 < e2*)
+  (*todo*) 
+  | LE (e1, e2) -> (*e1 <= e2*)
+  (*todo*) 
+  | GT (e1, e2) -> (*e1 > e2*)
+  (*todo*) 
+  | GE (e1, e2) -> (*e1 >= e2*)
+  (*todo*) 
   | READ -> [(SInt (new_sym ()), pi)]
   | IF (cond, e1, e2) ->
     let l = sym_eval cond env pi in
