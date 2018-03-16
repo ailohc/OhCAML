@@ -37,6 +37,10 @@ exp:
   | exp STAR exp  { Lang.MUL ($1,$3) }
   | exp SLASH exp  { Lang.DIV ($1,$3) }
   | ISZERO exp { Lang.ISZERO $2 }
+  | exp LT exp { Lang.LT ($1,$3) } 
+  | exp LE exp { Lang.LE ($1,$3) } 
+  | exp GT exp { Lang.GT ($1,$3) } 
+  | exp GE exp { Lang.GE ($1,$3) } 
   | IF exp THEN exp ELSE exp { Lang.IF ($2,$4,$6) }
   | LET ID EQUAL exp IN exp { Lang.LET ($2,$4,$6) }
   | LETREC ID LPAREN ID RPAREN EQUAL exp IN exp { Lang.LETREC ($2,$4,$7,$9) }
