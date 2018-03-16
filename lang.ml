@@ -166,6 +166,10 @@ type path_exp =
   (* symbolic equation *)
   | EQUAL of sym_value * sym_value
   | NOTEQ of sym_value * sym_value
+  | LESSTHAN of sym_value * sym_value
+  | LESSEQ of sym_value * sym_value
+  | GREATTHAN of sym_value * sym_value
+  | GREATEQ of sym_value * sym_value
 and path_cond = path_exp
 
 let default_path_cond = TRUE
@@ -194,6 +198,10 @@ let rec simplify_cond : path_exp -> path_exp
   | NOT e -> NOT (simplify_cond e)
   | EQUAL (v1, v2) -> EQUAL (simplify_val v1, simplify_val v2)
   | NOTEQ (v1, v2) -> NOTEQ (simplify_val v1, simplify_val v2)
+  | LESSTHAN (v1, v2) -> LESSTHAN (simplify_val v1, simplify_val v2)
+  | LESSEQ (v1, v2) -> LESSEQ (simplify_val v1, simplify_val v2)
+  | GREATTHAN (v1, v2) -> GREATTHAN (simplify_val v1, simplify_val v2)
+  | GREATEQ (v1, v2) -> GREATEQ (simplify_val v1, simplify_val v2)
 
 let rec cond2str : path_exp -> string
 = fun pi ->
@@ -205,3 +213,10 @@ let rec cond2str : path_exp -> string
   | NOT e -> "!(" ^ cond2str e ^ ")"
   | EQUAL (v1, v2) -> "(" ^ value2str v1 ^ " = " ^ value2str v2 ^ ")"
   | NOTEQ (v1, v2) -> "(" ^ value2str v1 ^ " != " ^ value2str v2 ^ ")"
+  | LESSTHAN (v1, v2) -> "(" ^ value2str v1 ^ " < " ^ value2str v2 ^ ")"
+  | LESSEQ (v1, v2) -> "(" ^ value2str v1 ^ " <= " ^ value2str v2 ^ ")"
+  | GREATTHAN (v1, v2) -> "(" ^ value2str v1 ^ " > " ^ value2str v2 ^ ")"
+  | GREATEQ (v1, v2) -> "(" ^ value2str v1 ^ " >= " ^ value2str v2 ^ ")"
+
+
+  

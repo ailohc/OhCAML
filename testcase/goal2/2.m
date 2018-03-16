@@ -1,13 +1,13 @@
 let check = proc (a) (proc (b) (proc (c) (
-    if a > b then
-        if a > c then
-            a * a - b * b - c * c = 0
+    if (a > b) then
+        (if (a > c) then
+            iszero ((a * a) - (b * b) - (c * c))
         else
-            c * c - a * a - b * b = 0
+            iszero ((c * c) - (a * a) - (b * b)))
     else
-        if b > c then
-            b * b - a * a - c * c = 0
+        (if (b > c) then
+            iszero ((b * b) - (a * a) - (c * c))
         else
-            c * c - a * a - b * b = 0
+            iszero ((c * c) - (a * a) - (b * b)))
 )))
-in ((((check read) read) read)
+in (((check read) read) read)

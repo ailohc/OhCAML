@@ -93,14 +93,74 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
       | EoR _ | Error _ -> [(v, pi)]
       | _ -> raise SyntaxError
     )
-  | LT (e1, e2) -> raise SyntaxError(*e1 < e2*)
-  (*todo*) 
-  | LE (e1, e2) -> raise SyntaxError(*e1 <= e2*)
-  (*todo*) 
-  | GT (e1, e2) -> raise SyntaxError(*e1 > e2*)
-  (*todo*) 
-  | GE (e1, e2) -> raise SyntaxError(*e1 >= e2*)
-  (*todo*) 
+  | LT (e1, e2) -> (*e1 < e2*)
+    let l1 = sym_eval e1 env pi in
+    sym_eval_aux l1 (
+      fun v1 pi ->
+        let l2 = sym_eval e2 env pi in
+        sym_eval_aux l2 (
+          fun v2 pi ->
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
+          | Error s, _ | _, Error s -> [(Error s, pi)]
+          | Int n1, Int n2 -> if n1 < n2 then [(Bool true, pi)] else [(Bool false, pi)]
+          | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, LESSTHAN(v1, v2))); (Bool false, AND(pi, GREATEQ(v1, v2)))]
+          | _ -> raise SyntaxError
+        )
+    )
+  | LE (e1, e2) -> (*e1 <= e2*)
+    let l1 = sym_eval e1 env pi in
+    sym_eval_aux l1 (
+      fun v1 pi ->
+        let l2 = sym_eval e2 env pi in
+        sym_eval_aux l2 (
+          fun v2 pi ->
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
+          | Error s, _ | _, Error s -> [(Error s, pi)]
+          | Int n1, Int n2 -> if n1 <= n2 then [(Bool true, pi)] else [(Bool false, pi)]
+          | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, LESSEQ(v1, v2))); (Bool false, AND(pi, GREATTHAN(v1, v2)))]
+          | _ -> raise SyntaxError
+        )
+    )
+  | GT (e1, e2) -> (*e1 > e2*)
+    let l1 = sym_eval e1 env pi in
+    sym_eval_aux l1 (
+      fun v1 pi ->
+        let l2 = sym_eval e2 env pi in
+        sym_eval_aux l2 (
+          fun v2 pi ->
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
+          | Error s, _ | _, Error s -> [(Error s, pi)]
+          | Int n1, Int n2 -> if n1 > n2 then [(Bool true, pi)] else [(Bool false, pi)]
+          | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, GREATTHAN(v1, v2))); (Bool false, AND(pi, LESSEQ(v1, v2)))]
+          | _ -> raise SyntaxError
+        )
+    )
+  | GE (e1, e2) -> (*e1 >= e2*)
+    let l1 = sym_eval e1 env pi in
+    sym_eval_aux l1 (
+      fun v1 pi ->
+        let l2 = sym_eval e2 env pi in
+        sym_eval_aux l2 (
+          fun v2 pi ->
+          match v1, v2 with
+          | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
+          | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
+          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
+          | Error s, _ | _, Error s -> [(Error s, pi)]
+          | Int n1, Int n2 -> if n1 >= n2 then [(Bool true, pi)] else [(Bool false, pi)]
+          | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, GREATEQ(v1, v2))); (Bool false, AND(pi, LESSTHAN(v1, v2)))]
+          | _ -> raise SyntaxError
+        )
+    )
   | READ -> [(SInt (new_sym ()), pi)]
   | IF (cond, e1, e2) ->
     let l = sym_eval cond env pi in
