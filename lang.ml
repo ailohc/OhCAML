@@ -63,6 +63,9 @@ type sym_value =
   (* error *)
   | EoR of var (* end of recursive *)
   | Error of string
+  (* simplify *)
+  | Sum of sym_value list
+  | Product of sym_value list
 and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list

@@ -54,6 +54,18 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
       | SDIV -> div ctx (val2expr_aux ctx v1) (val2expr_aux ctx v2)
     end
   | SMinus v1 -> minus ctx (val2expr_aux ctx v1)
+  | Sum l ->
+    begin
+      match l with
+      | [] -> val2expr_aux ctx (Int 0)
+      | hd::tl -> add ctx (val2expr_aux ctx hd) (val2expr_aux ctx (Sum tl))
+    end
+  | Product l ->
+    begin
+      match l with
+      | [] -> val2expr_aux ctx (Int 1)
+      | hd::tl -> mul ctx (val2expr_aux ctx hd) (val2expr_aux ctx (Product tl))
+    end
   | Fun _ | FunRec _ | SVar _ | SFun _ | SFunApp _ | EoR _ | Error _ -> raise NotComputableValue
 
 let val2expr : sym_value -> Expr.expr
@@ -81,7 +93,7 @@ let path2expr : path_exp -> Expr.expr
 let expr2val : Expr.expr -> sym_value
 = fun expr -> 
   match expr with
-  | _ -> NotComputableValue
+  | _ -> raise NotComputableValue
 
 let expr2path : Expr.expr -> path_exp
 = fun expr ->
