@@ -1,9 +1,7 @@
+open Util
 open Lang
 open Z3
-open Z3.Solver
-open Z3.Expr
-open Z3.Arithmetic.Integer
-open Z3.Boolean
+open Z3enums
 
 (* context *)
 let new_ctx () = mk_context []
@@ -43,8 +41,8 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
   match v with
   | Int n -> const_n ctx n
   | Bool b -> const_b ctx b
-  | SInt id -> mk_const ctx ("alpha" ^ string_of_int id) (int_sort ctx)
-  | SBool id -> mk_const ctx ("beta" ^ string_of_int id) (bool_sort ctx)
+  | SInt id -> mk_const ctx ("alpha_" ^ string_of_int id) (int_sort ctx)
+  | SBool id -> mk_const ctx ("beta_" ^ string_of_int id) (bool_sort ctx)
   | SExp (aop, v1, v2) ->
     begin
       match aop with
@@ -71,6 +69,39 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
 let val2expr : sym_value -> Expr.expr
 = fun v -> val2expr_aux (new_ctx ()) v
 
+let rec expr2val : Expr.expr -> sym_value
+= fun expr -> 
+  let op = FuncDecl.get_decl_kind (Expr.get_func_decl expr) in
+  match op with
+  | OP_ADD ->
+    begin
+      let n = Expr.get_num_args expr in
+      if n = 2 then
+      begin
+        let [hd; tl] = Expr.get_args expr in
+        SExp (SADD, expr2val hd, expr2val tl)
+      end
+      else if n > 3 then
+      begin
+        let l = Expr.get_args expr in
+        Sum (map l expr2val)
+      end
+      else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
+    end
+  | OP_ANUM -> let n = int_of_string (Expr.to_string expr) in Int n
+  | OP_UNINTERPRETED ->
+    begin
+      let str = Symbol.get_string (FuncDecl.get_name (Expr.get_func_decl expr)) in
+      let l = Str.split (Str.regexp "_") str in
+      match l with
+      | [hd; tl] ->
+        if hd = "alpha" then SInt (int_of_string tl)
+        else if tl = "beta" then SBool (int_of_string tl)
+        else raise (Failure "SHOULD NOT COME HERE")
+      | _ -> raise (Failure "SHOULD NOT COME HERE")
+    end
+  | _ -> raise (Failure "expr2val: Not Implemented")
+
 let rec path2expr_aux : context -> path_exp -> Expr.expr
 = fun ctx p ->
   match p with
@@ -89,11 +120,6 @@ let rec path2expr_aux : context -> path_exp -> Expr.expr
 
 let path2expr : path_exp -> Expr.expr
 = fun p -> path2expr_aux (new_ctx ()) p
-
-let expr2val : Expr.expr -> sym_value
-= fun expr -> 
-  match expr with
-  | _ -> raise NotComputableValue
 
 let expr2path : Expr.expr -> path_exp
 = fun expr ->
