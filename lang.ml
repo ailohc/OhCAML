@@ -129,6 +129,9 @@ type path_exp =
   | LESSEQ of sym_value * sym_value
   | GREATTHAN of sym_value * sym_value
   | GREATEQ of sym_value * sym_value
+  (* simplify *)
+  | ANDL of path_exp list
+  | ORL of path_exp list
 and path_cond = path_exp
 
 let default_path_cond = TRUE
@@ -147,6 +150,5 @@ let rec cond2str : path_exp -> string
   | LESSEQ (v1, v2) -> "(" ^ value2str v1 ^ " <= " ^ value2str v2 ^ ")"
   | GREATTHAN (v1, v2) -> "(" ^ value2str v1 ^ " > " ^ value2str v2 ^ ")"
   | GREATEQ (v1, v2) -> "(" ^ value2str v1 ^ " >= " ^ value2str v2 ^ ")"
-
-
-  
+  | ANDL l -> "(" ^ fold l (fun v1 s2 -> cond2str v1 ^ (if s2 = ")" then "" else " and ") ^ s2) ")"
+  | ORL l -> "(" ^ fold l (fun v1 s2 -> cond2str v1 ^ (if s2 = ")" then "" else " or ") ^ s2) ")"

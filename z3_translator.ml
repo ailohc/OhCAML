@@ -73,6 +73,23 @@ let rec expr2val : Expr.expr -> sym_value
 = fun expr -> 
   let op = FuncDecl.get_decl_kind (Expr.get_func_decl expr) in
   match op with
+  | OP_ANUM -> (* int *)
+    let str = Expr.to_string expr in
+    let str = if Str.string_match (Str.regexp "(- ") str 0 then Str.replace_first (Str.regexp "(- ") "-" (Str.replace_first (Str.regexp ")") "" str) else str in
+    let n = int_of_string (str) in Int n
+  | OP_TRUE -> Bool true
+  | OP_FALSE -> Bool false
+  | OP_UNINTERPRETED -> (* symbol *)
+    begin
+      let str = Symbol.get_string (FuncDecl.get_name (Expr.get_func_decl expr)) in
+      let l = Str.split (Str.regexp "_") str in
+      match l with
+      | [hd; tl] ->
+        if hd = "alpha" then SInt (int_of_string tl)
+        else if tl = "beta" then SBool (int_of_string tl)
+        else raise (Failure "SHOULD NOT COME HERE")
+      | _ -> raise (Failure "SHOULD NOT COME HERE")
+    end
   | OP_ADD -> (* sum *)
     begin
       let n = Expr.get_num_args expr in
@@ -104,21 +121,6 @@ let rec expr2val : Expr.expr -> sym_value
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
   | OP_IDIV -> (* div *) let [hd; tl] = Expr.get_args expr in SExp (SDIV, expr2val hd, expr2val tl)
-  | OP_ANUM -> (* int *)
-    let str = Expr.to_string expr in
-    let str = if Str.string_match (Str.regexp "(- ") str 0 then Str.replace_first (Str.regexp "(- ") "-" (Str.replace_first (Str.regexp ")") "" str) else str in
-    let n = int_of_string (str) in Int n
-  | OP_UNINTERPRETED -> (* symbol *)
-    begin
-      let str = Symbol.get_string (FuncDecl.get_name (Expr.get_func_decl expr)) in
-      let l = Str.split (Str.regexp "_") str in
-      match l with
-      | [hd; tl] ->
-        if hd = "alpha" then SInt (int_of_string tl)
-        else if tl = "beta" then SBool (int_of_string tl)
-        else raise (Failure "SHOULD NOT COME HERE")
-      | _ -> raise (Failure "SHOULD NOT COME HERE")
-    end
   | _ -> raise (Failure "expr2val: Not Implemented")
 
 let rec path2expr_aux : context -> path_exp -> Expr.expr
@@ -140,10 +142,41 @@ let rec path2expr_aux : context -> path_exp -> Expr.expr
 let path2expr : path_exp -> Expr.expr
 = fun p -> path2expr_aux (new_ctx ()) p
 
-let expr2path : Expr.expr -> path_exp
+let rec expr2path : Expr.expr -> path_exp
 = fun expr ->
-  match expr with
-  | _ -> print_endline("*****should be modified******"); TRUE (*to modify*)
+  let op = FuncDecl.get_decl_kind (Expr.get_func_decl expr) in
+  match op with
+  | OP_TRUE -> TRUE
+  | OP_FALSE -> FALSE
+  | OP_AND -> (* and *)
+    begin
+      let n = Expr.get_num_args expr in
+      if n = 2 then
+      begin
+        let [hd; tl] = Expr.get_args expr in AND (expr2path hd, expr2path tl)
+      end
+      else if n > 2 then
+      begin
+        let l = Expr.get_args expr in ANDL (map l expr2path)
+      end
+      else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
+    end
+  | OP_OR -> (* or *)
+    begin
+      let n = Expr.get_num_args expr in
+      if n = 2 then
+        let [hd; tl] = Expr.get_args expr in OR (expr2path hd, expr2path tl)
+      else if n > 2 then
+        let l = Expr.get_args expr in ANDL (map l expr2path)
+      else (* Expr.get_num_args <  2 *) raise (Failure "SHOULD NOT COME HERE")
+    end
+  | OP_EQ -> (* equal *) let [hd; tl] = Expr.get_args expr in EQUAL (expr2val hd, expr2val tl)
+  | OP_NOT -> let [e] = Expr.get_args expr in NOT (expr2path e)
+  | OP_LE -> let [hd; tl] = Expr.get_args expr in LESSEQ (expr2val hd, expr2val tl)
+  | OP_GE -> let [hd; tl] = Expr.get_args expr in GREATEQ (expr2val hd, expr2val tl)
+  | OP_LT -> let [hd; tl] = Expr.get_args expr in LESSTHAN (expr2val hd, expr2val tl)
+  | OP_GT -> let [hd; tl] = Expr.get_args expr in GREATTHAN (expr2val hd, expr2val tl)
+  | _ -> raise (Failure "expr2path: Not Implemented")
 
 (*let rec get_path_sat_aux : Solver.solver -> Expr.expr -> unit
 = fun sol expr -> Z3.Solver.add sol (Z3.Expr.get_args expr)
