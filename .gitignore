@@ -1,5 +1,3 @@
 # ignore compiled files
 _build/
 main.native
-1.ml
-lang.ml
