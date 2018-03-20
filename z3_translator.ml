@@ -59,5 +59,32 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
 let val2expr : sym_value -> Expr.expr
 = fun v -> val2expr_aux (new_ctx ()) v
 
+let rec path2expr_aux : context -> path_exp -> Expr.expr
+= fun ctx p ->
+match p with
+| TRUE -> Z3.Boolean.mk_true ctx
+| FALSE -> Z3.Boolean.mk_false ctx
+| AND (p1, p2) -> and_b ctx (path2expr_aux ctx p1) (path2expr_aux ctx p2)
+| OR (p1, p2) -> or_b ctx (path2expr_aux ctx p1) (path2expr_aux ctx p2)
+| NOT p -> not_b ctx (path2expr_aux ctx p)
+| EQUAL (p1, p2) -> eq ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+| NOTEQ (p1, p2) -> neq ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+| LESSTHAN (p1, p2) -> lt ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+| LESSEQ (p1, p2) -> le ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+| GREATTHAN (p1, p2) -> gt ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+| GREATEQ (p1, p2) -> ge ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+| _ -> raise NotComputableValue
+
+let path2expr : path_exp -> Expr.expr
+= fun p -> path2expr_aux (new_ctx ()) p
+
 let expr2val : Expr.expr -> sym_value
-= fun expr -> raise (Failure "expr2val: Not Implemented")
+= fun expr -> 
+  match expr with
+  | _ -> NotComputableValue
+
+let expr2path : Expr.expr -> path_exp
+= fun expr ->
+  match expr with
+  | _ -> TRUE (*to modify*)
+

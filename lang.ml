@@ -173,7 +173,7 @@ type path_exp =
 and path_cond = path_exp
 
 let default_path_cond = TRUE
-
+(*
 let rec simplify_cond : path_exp -> path_exp
 = fun pi ->
   match pi with
@@ -202,7 +202,7 @@ let rec simplify_cond : path_exp -> path_exp
   | LESSEQ (v1, v2) -> LESSEQ (simplify_val v1, simplify_val v2)
   | GREATTHAN (v1, v2) -> GREATTHAN (simplify_val v1, simplify_val v2)
   | GREATEQ (v1, v2) -> GREATEQ (simplify_val v1, simplify_val v2)
-
+*)
 let rec cond2str : path_exp -> string
 = fun pi ->
   match pi with
