@@ -88,6 +88,21 @@ let rec expr2val : Expr.expr -> sym_value
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
+  | OP_MUL ->
+    begin
+      let n = Expr.get_num_args expr in
+      if n = 2 then
+      begin
+        let [hd; tl] = Expr.get_args expr in
+        SExp (SMUL, expr2val hd, expr2val tl)
+      end
+      else if n > 2 then
+      begin
+        let l = Expr.get_args expr in
+        Product (map l expr2val)
+      end
+      else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
+    end
   | OP_ANUM -> let n = int_of_string (Expr.to_string expr) in Int n
   | OP_UNINTERPRETED ->
     begin
