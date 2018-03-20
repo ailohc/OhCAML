@@ -1,6 +1,7 @@
 open Lang
 open Sym_eval
 open Solve
+open Simplify
 
 (* equality comparison between programs *)
 let prog_equal : exp -> exp -> bool
@@ -29,7 +30,7 @@ let run : program -> unit
         | (v, pi)::tl ->
             print_endline ("<" ^ string_of_int cnt ^ ">");
             print_endline ("path condition: " ^ cond2str (simplify_cond pi));
-            print_endline ("value: " ^ value2str (v));
+            print_endline ("value: " ^ value2str (simplify_val (v)));
             print_newline ();
             print_aux tl (cnt + 1)
     in
