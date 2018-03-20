@@ -1,7 +1,18 @@
 open Util
 open Lang
 open Z3
+<<<<<<< HEAD
 open Z3enums
+=======
+open Z3.Solver
+open Z3.Expr
+open Z3.Arithmetic.Integer
+open Z3.Boolean
+open Z3.Solver
+
+(* solver *)
+let new_solver () = Z3.Solver.mk_solver (mk_context []) None
+>>>>>>> d96cf5b40be0c68cf5e904042fd40abfe068d72a
 
 (* context *)
 let new_ctx () = mk_context []
@@ -121,8 +132,23 @@ let rec path2expr_aux : context -> path_exp -> Expr.expr
 let path2expr : path_exp -> Expr.expr
 = fun p -> path2expr_aux (new_ctx ()) p
 
+<<<<<<< HEAD
+=======
+let expr2val : Expr.expr -> sym_value
+= fun expr -> 
+  match expr with
+  | _ -> raise NotComputableValue(*to modify*)
+
+>>>>>>> d96cf5b40be0c68cf5e904042fd40abfe068d72a
 let expr2path : Expr.expr -> path_exp
 = fun expr ->
   match expr with
-  | _ -> TRUE (*to modify*)
+  | _ -> print_endline("*****should be modified******"); TRUE (*to modify*)
+
+let rec get_path_sat_aux : Solver.solver -> Expr.expr -> unit
+= fun sol expr -> Z3.Solver.add sol (Z3.Expr.get_args expr)
+
+let get_path_sat : Expr.expr -> unit
+= fun expr -> get_path_sat_aux (new_solver ()) expr
+
 

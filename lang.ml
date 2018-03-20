@@ -128,36 +128,7 @@ type path_exp =
 and path_cond = path_exp
 
 let default_path_cond = TRUE
-(*
-let rec simplify_cond : path_exp -> path_exp
-= fun pi ->
-  match pi with
-  | TRUE -> TRUE
-  | FALSE -> FALSE
-  | AND (e1, e2) ->
-    let e1, e2 = simplify_cond e1, simplify_cond e2 in
-    begin
-      match e1, e2 with
-      | TRUE, _ -> e2
-      | FALSE, _ -> FALSE
-      | _ -> AND (e1, e2)
-    end
-  | OR (e1, e2) ->
-    let e1, e2 = simplify_cond e1, simplify_cond e2 in
-    begin
-      match e1, e2 with
-      | TRUE, _ -> TRUE
-      | FALSE, _ -> e2
-      | _ -> OR (e1, e2)
-    end
-  | NOT e -> NOT (simplify_cond e)
-  | EQUAL (v1, v2) -> EQUAL (simplify_val v1, simplify_val v2)
-  | NOTEQ (v1, v2) -> NOTEQ (simplify_val v1, simplify_val v2)
-  | LESSTHAN (v1, v2) -> LESSTHAN (simplify_val v1, simplify_val v2)
-  | LESSEQ (v1, v2) -> LESSEQ (simplify_val v1, simplify_val v2)
-  | GREATTHAN (v1, v2) -> GREATTHAN (simplify_val v1, simplify_val v2)
-  | GREATEQ (v1, v2) -> GREATEQ (simplify_val v1, simplify_val v2)
-*)
+
 let rec cond2str : path_exp -> string
 = fun pi ->
   match pi with
