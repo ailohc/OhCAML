@@ -103,7 +103,10 @@ let rec expr2val : Expr.expr -> sym_value
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
-  | OP_ANUM -> let n = int_of_string (Expr.to_string expr) in Int n
+  | OP_ANUM ->
+    let str = Expr.to_string expr in
+    let str = if Str.string_match (Str.regexp "(- ") str 0 then Str.replace_first (Str.regexp "(- ") "-" (Str.replace_first (Str.regexp ")") "" str) else str in
+    let n = int_of_string (str) in Int n
   | OP_UNINTERPRETED ->
     begin
       let str = Symbol.get_string (FuncDecl.get_name (Expr.get_func_decl expr)) in
