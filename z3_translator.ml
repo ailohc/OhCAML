@@ -81,7 +81,7 @@ let rec expr2val : Expr.expr -> sym_value
         let [hd; tl] = Expr.get_args expr in
         SExp (SADD, expr2val hd, expr2val tl)
       end
-      else if n > 3 then
+      else if n > 2 then
       begin
         let l = Expr.get_args expr in
         Sum (map l expr2val)
@@ -126,10 +126,10 @@ let expr2path : Expr.expr -> path_exp
   match expr with
   | _ -> print_endline("*****should be modified******"); TRUE (*to modify*)
 
-let rec get_path_sat_aux : Solver.solver -> Expr.expr -> unit
+(*let rec get_path_sat_aux : Solver.solver -> Expr.expr -> unit
 = fun sol expr -> Z3.Solver.add sol (Z3.Expr.get_args expr)
 
 let get_path_sat : Expr.expr -> unit
 = fun expr -> get_path_sat_aux (new_solver ()) expr
-
+*)
 

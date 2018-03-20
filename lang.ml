@@ -1,3 +1,5 @@
+open Util
+
 (* expression *)
 type program = exp
 and exp = 
@@ -109,6 +111,8 @@ let rec value2str : sym_value -> string
   | SFunApp (id, v, t) -> "Sym_fun" ^ string_of_int id ^ "(" ^ value2str v ^ ")"
   | EoR f -> "Can't eval: fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
   | Error s -> "Error: " ^ s
+  | Sum l -> "(" ^ fold l (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " + ") ^ s2) ")"
+  | Product l -> "(" ^ fold l (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " * ") ^ s2) ")"
 
 type path_exp =
   (* boolean exp *)
