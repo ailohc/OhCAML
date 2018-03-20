@@ -1,4 +1,5 @@
 open Lang
+open Solve
 
 exception SyntaxError
 
@@ -12,7 +13,8 @@ let rec sym_eval_aux : (sym_value * path_cond) list -> (sym_value -> path_cond -
 
 let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
 = fun e env pi ->
-  match e with
+  if not (sat_check pi) then []
+  else match e with
   | CONST n -> [(Int n, pi)]
   | TRUE -> [(Bool true, pi)]
   | FALSE -> [(Bool false, pi)]

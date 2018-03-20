@@ -72,7 +72,7 @@ and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
 
-let recursive_cnt = 4
+let recursive_cnt = 5
 
 let sym_cnt = ref 0
 let init_sym_cnt () = sym_cnt := 0
@@ -143,7 +143,7 @@ let rec cond2str : path_exp -> string
   | FALSE -> "false"
   | AND (e1, e2) -> "(" ^ cond2str e1 ^ " and " ^ cond2str e2 ^ ")"
   | OR (e1, e2) -> "(" ^ cond2str e1 ^ " or " ^ cond2str e2 ^ ")"
-  | NOT e -> "!(" ^ cond2str e ^ ")"
+  | NOT e -> "!" ^ cond2str e
   | EQUAL (v1, v2) -> "(" ^ value2str v1 ^ " = " ^ value2str v2 ^ ")"
   | NOTEQ (v1, v2) -> "(" ^ value2str v1 ^ " != " ^ value2str v2 ^ ")"
   | LESSTHAN (v1, v2) -> "(" ^ value2str v1 ^ " < " ^ value2str v2 ^ ")"
