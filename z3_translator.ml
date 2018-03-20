@@ -1,18 +1,7 @@
 open Util
 open Lang
 open Z3
-<<<<<<< HEAD
 open Z3enums
-=======
-open Z3.Solver
-open Z3.Expr
-open Z3.Arithmetic.Integer
-open Z3.Boolean
-open Z3.Solver
-
-(* solver *)
-let new_solver () = Z3.Solver.mk_solver (mk_context []) None
->>>>>>> d96cf5b40be0c68cf5e904042fd40abfe068d72a
 
 (* context *)
 let new_ctx () = mk_context []
