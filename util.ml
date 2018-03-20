@@ -1,9 +1,9 @@
-let rec map l f =
+let rec map f l =
   match l with
   | [] -> []
-  | hd::tl -> (f hd)::(map tl f)
+  | hd::tl -> (f hd)::(map f tl)
 
-let rec fold l f r=
+let rec fold f l a=
   match l with
-  | [] -> r
-  | hd::tl -> f hd (fold tl f r)
+  | [] -> a
+  | hd::tl -> f hd (fold f tl a)

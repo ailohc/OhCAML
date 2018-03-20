@@ -111,8 +111,8 @@ let rec value2str : sym_value -> string
   | SFunApp (id, v, t) -> "Sym_fun" ^ string_of_int id ^ "(" ^ value2str v ^ ")"
   | EoR f -> "Can't eval: fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
   | Error s -> "Error: " ^ s
-  | Sum l -> "(" ^ fold l (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " + ") ^ s2) ")"
-  | Product l -> "(" ^ fold l (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " * ") ^ s2) ")"
+  | Sum l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " + ") ^ s2) l ")"
+  | Product l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " * ") ^ s2) l ")"
 
 type path_exp =
   (* boolean exp *)
@@ -150,5 +150,5 @@ let rec cond2str : path_exp -> string
   | LESSEQ (v1, v2) -> "(" ^ value2str v1 ^ " <= " ^ value2str v2 ^ ")"
   | GREATTHAN (v1, v2) -> "(" ^ value2str v1 ^ " > " ^ value2str v2 ^ ")"
   | GREATEQ (v1, v2) -> "(" ^ value2str v1 ^ " >= " ^ value2str v2 ^ ")"
-  | ANDL l -> "(" ^ fold l (fun v1 s2 -> cond2str v1 ^ (if s2 = ")" then "" else " and ") ^ s2) ")"
-  | ORL l -> "(" ^ fold l (fun v1 s2 -> cond2str v1 ^ (if s2 = ")" then "" else " or ") ^ s2) ")"
+  | ANDL l -> "(" ^ fold (fun v1 s2 -> cond2str v1 ^ (if s2 = ")" then "" else " and ") ^ s2) l ")"
+  | ORL l -> "(" ^ fold (fun v1 s2 -> cond2str v1 ^ (if s2 = ")" then "" else " or ") ^ s2) l ")"

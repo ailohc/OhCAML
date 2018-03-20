@@ -101,7 +101,7 @@ let rec expr2val : Expr.expr -> sym_value
       else if n > 2 then
       begin
         let l = Expr.get_args expr in
-        Sum (map l expr2val)
+        Sum (map expr2val l)
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
@@ -116,7 +116,7 @@ let rec expr2val : Expr.expr -> sym_value
       else if n > 2 then
       begin
         let l = Expr.get_args expr in
-        Product (map l expr2val)
+        Product (map expr2val l)
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
@@ -157,7 +157,7 @@ let rec expr2path : Expr.expr -> path_exp
       end
       else if n > 2 then
       begin
-        let l = Expr.get_args expr in ANDL (map l expr2path)
+        let l = Expr.get_args expr in ANDL (map expr2path l)
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
@@ -167,7 +167,7 @@ let rec expr2path : Expr.expr -> path_exp
       if n = 2 then
         let [hd; tl] = Expr.get_args expr in OR (expr2path hd, expr2path tl)
       else if n > 2 then
-        let l = Expr.get_args expr in ANDL (map l expr2path)
+        let l = Expr.get_args expr in ANDL (map expr2path l)
       else (* Expr.get_num_args <  2 *) raise (Failure "SHOULD NOT COME HERE")
     end
   | OP_EQ -> (* equal *) let [hd; tl] = Expr.get_args expr in EQUAL (expr2val hd, expr2val tl)
