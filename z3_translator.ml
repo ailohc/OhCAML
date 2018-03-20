@@ -48,10 +48,10 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
   | SExp (aop, v1, v2) ->
     begin
       match aop with
-      | SADD -> add ctx (val2expr_aux ctx v) (val2expr_aux ctx v)
-      | SSUB -> sub ctx (val2expr_aux ctx v) (val2expr_aux ctx v)
-      | SMUL -> mul ctx (val2expr_aux ctx v) (val2expr_aux ctx v)
-      | SDIV -> div ctx (val2expr_aux ctx v) (val2expr_aux ctx v)
+      | SADD -> add ctx (val2expr_aux ctx v1) (val2expr_aux ctx v2)
+      | SSUB -> sub ctx (val2expr_aux ctx v1) (val2expr_aux ctx v2)
+      | SMUL -> mul ctx (val2expr_aux ctx v1) (val2expr_aux ctx v2)
+      | SDIV -> div ctx (val2expr_aux ctx v1) (val2expr_aux ctx v2)
     end
   | SMinus v1 -> minus ctx (val2expr_aux ctx v1)
   | Fun _ | FunRec _ | SVar _ | SFun _ | SFunApp _ | EoR _ | Error _ -> raise NotComputableValue
