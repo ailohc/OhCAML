@@ -4,6 +4,10 @@ open Z3.Solver
 open Z3.Expr
 open Z3.Arithmetic.Integer
 open Z3.Boolean
+open Z3.Solver
+
+(* solver *)
+let new_solver () = Z3.Solver.mk_solver (mk_context []) None
 
 (* context *)
 let new_ctx () = mk_context []
@@ -93,10 +97,17 @@ let path2expr : path_exp -> Expr.expr
 let expr2val : Expr.expr -> sym_value
 = fun expr -> 
   match expr with
-  | _ -> raise NotComputableValue
+  | _ -> raise NotComputableValue(*to modify*)
 
 let expr2path : Expr.expr -> path_exp
 = fun expr ->
   match expr with
-  | _ -> TRUE (*to modify*)
+  | _ -> print_endline("*****should be modified******"); TRUE (*to modify*)
+
+let rec get_path_sat_aux : Solver.solver -> Expr.expr -> unit
+= fun sol expr -> Z3.Solver.add sol (Z3.Expr.get_args expr)
+
+let get_path_sat : Expr.expr -> unit
+= fun expr -> get_path_sat_aux (new_solver ()) expr
+
 
