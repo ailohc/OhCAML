@@ -73,7 +73,7 @@ let rec expr2val : Expr.expr -> sym_value
 = fun expr -> 
   let op = FuncDecl.get_decl_kind (Expr.get_func_decl expr) in
   match op with
-  | OP_ADD ->
+  | OP_ADD -> (* sum *)
     begin
       let n = Expr.get_num_args expr in
       if n = 2 then
@@ -88,7 +88,7 @@ let rec expr2val : Expr.expr -> sym_value
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
-  | OP_MUL ->
+  | OP_MUL -> (* product *)
     begin
       let n = Expr.get_num_args expr in
       if n = 2 then
@@ -103,11 +103,12 @@ let rec expr2val : Expr.expr -> sym_value
       end
       else (* Expr.get_num_args < 2 *) raise (Failure "SHOULD NOT COME HERE")
     end
-  | OP_ANUM ->
+  | OP_IDIV -> (* div *) let [hd; tl] = Expr.get_args expr in SExp (SDIV, expr2val hd, expr2val tl)
+  | OP_ANUM -> (* int *)
     let str = Expr.to_string expr in
     let str = if Str.string_match (Str.regexp "(- ") str 0 then Str.replace_first (Str.regexp "(- ") "-" (Str.replace_first (Str.regexp ")") "" str) else str in
     let n = int_of_string (str) in Int n
-  | OP_UNINTERPRETED ->
+  | OP_UNINTERPRETED -> (* symbol *)
     begin
       let str = Symbol.get_string (FuncDecl.get_name (Expr.get_func_decl expr)) in
       let l = Str.split (Str.regexp "_") str in
@@ -123,8 +124,8 @@ let rec expr2val : Expr.expr -> sym_value
 let rec path2expr_aux : context -> path_exp -> Expr.expr
 = fun ctx p ->
   match p with
-  | TRUE -> Z3.Boolean.mk_true ctx
-  | FALSE -> Z3.Boolean.mk_false ctx
+  | TRUE -> const_b ctx true
+  | FALSE -> const_b ctx false
   | AND (p1, p2) -> and_b ctx (path2expr_aux ctx p1) (path2expr_aux ctx p2)
   | OR (p1, p2) -> or_b ctx (path2expr_aux ctx p1) (path2expr_aux ctx p2)
   | NOT p -> not_b ctx (path2expr_aux ctx p)

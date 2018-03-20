@@ -4,9 +4,9 @@ open Z3_translator
 
 let simplify_val : sym_value -> sym_value
 = fun v ->
-  let expr = val2expr v in
-  let expr = simplify expr None in
-  expr2val expr
+  match v with
+  | Error _ | EoR _ -> v
+  | _ -> let expr = val2expr v in let expr = simplify expr None in expr2val expr
 
 let simplify_path : path_exp -> path_exp
 = fun p ->
