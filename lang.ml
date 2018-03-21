@@ -132,6 +132,8 @@ type path_exp =
   (* simplify *)
   | ANDL of path_exp list
   | ORL of path_exp list
+  (* solve *)
+  | PATHEQ of path_exp * path_exp
 and path_cond = path_exp
 
 let default_path_cond = TRUE
