@@ -2,6 +2,8 @@ open Lang
 open Z3_translator
 open Z3.Solver
 
+exception CannotCompare
+
 let rec find_sym_var : sym_env-> var -> sym_env =
   fun senv x ->
   match senv with
@@ -33,6 +35,22 @@ let sat_check : path_cond -> bool
   | UNSATISFIABLE -> false
   | UNKNOWN -> false
   | SATISFIABLE -> true
+  
 
-let solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
-= fun t1 t2 -> raise (Failure "solve: Not Implemented") (* TODO *)
+let rec sym_val_check : sym_value -> sym_value -> bool
+= fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
+
+let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> bool
+= fun v1 v2_list ->
+  match v2_list with
+  | [] -> false
+  | (s2, p2)::tl -> 
+    match v1 with
+    | (s1, p1) -> if sat_check (PATHEQ (p1, p2)) then sym_val_check s1 s2 else solve_aux v1 tl 
+    | _ -> raise CannotCompare
+
+let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
+= fun v1_list v2_list ->
+  match v1_list with
+  | [] -> true
+  | (s1, p1)::tl -> (solve_aux (s1, p1) v2_list) && (solve tl v2_list)
