@@ -35,13 +35,16 @@ let sat_check : path_cond -> bool
   | UNSATISFIABLE -> false
   | UNKNOWN -> false
   | SATISFIABLE -> true
-
+(*
 let get_assertion : Expr.expr -> Expr.expr list 
 = fun exp -> 
   let ctx = new_ctx () in
   let solver = mk_solver ctx None in
   let _ = Z3.Solver.add solver [exp] in
   Z3.Solver.get_assertions solver
+
+let condition_assertions exp =
+    let assertions = get_assertion exp in List.map expr2path assertions*)
 
 let solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
 = fun t1 t2 -> raise (Failure "solve: Not Implemented") (* TODO *)
