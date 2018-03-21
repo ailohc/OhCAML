@@ -1,7 +1,6 @@
 open Lang
 open Sym_eval
 open Solve
-open Z3_translator
 open Simplify
 
 (* equality comparison between programs *)
@@ -26,19 +25,11 @@ let run : program -> unit
 = fun pgm ->
     let rec print_aux : (sym_value * path_cond) list -> int -> unit
     = fun l cnt ->
-        (*let rec print_list : string list -> unit
-        = fun lst ->
-        match lst with
-        | [] -> print_string ""
-        | h::t -> print_string (h); print_string ""; print_list t
-        in  *)
         match l with
         | [] -> print_newline ()
         | (v, pi)::tl ->
             print_endline ("<" ^ string_of_int cnt ^ ">");
-            print_endline ("path condition: " ^ cond2str (expr2path (simplify_path (pi))));
-            (*print_endline ("condition assertions") ;
-            print_list (List.map cond2str (condition_assertions (simplify_path (pi))));*)
+            print_endline ("path condition: " ^ cond2str (simplify_path (pi)));
             print_endline ("value: " ^ value2str (simplify_val (v)));
             print_newline ();
             print_aux tl (cnt + 1)
