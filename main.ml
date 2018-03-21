@@ -1,4 +1,5 @@
 open Lang
+open Options
 open Sym_eval
 open Solve
 open Simplify
@@ -37,31 +38,44 @@ let run : program -> unit
     let r = sym_eval pgm empty_env default_path_cond in
     print_aux r 1
 
+let usage_msg = "'main.native -h' for help"
+
 let main () =
-    let print_code = ref false in
-    let src = ref "" in
-    let spec = [("-pp", Arg.Set print_code, "pretty print the input program")] in
-    let usage = "Usage: run <options> <file>" in
-    let _ = Arg.parse spec
-                (fun
-                   x ->
-                     if Sys.file_exists x then src := x
-                     else raise (Arg.Bad (x ^ ": No files given")))
-                usage
-    in
-    
-	if !src = "" then Arg.usage spec usage
-    else
-    	let file_channel = open_in !src in
-    	let lexbuf = Lexing.from_channel file_channel in
-    	let pgm = Parser.program Lexer.start lexbuf in
-		try
-            run pgm
-        with e ->
-            match e with
-            | Lexer.LexicalError -> print_endline (!src ^ ": Lexical Error")
-            | SyntaxError -> print_endline (!src ^ ": Syntax Error")
-            | Failure s -> print_endline (!src ^ ": " ^ s)
-            | _ -> print_endline (!src ^ ": Unkown Error")
+    let _ = Arg.parse options (fun s -> ()) usage_msg in
+    if !opt_help then begin
+        print_endline ("OhCAML: OhCAML is Checking Assistant for ML");
+        print_endline ("Usage: main.native <options> <file>"); print_newline ();
+        print_endline ("option description");
+        print_endline ("    -h                  help");
+        print_endline ("    --run <file>        print result of symbolic execution");
+        print_endline ("    --criteria <file>   compare with 'target' file");
+        print_endline ("    --target <file>     compare with 'criteria' file");
+        print_endline ("    --counter           make counter example that make different output")
+    end else
+    let pgm =
+        if !opt_run = "" then None
+        else Some (
+            let file_channel = open_in !opt_run in
+            let lexbuf = Lexing.from_channel file_channel in
+            Parser.program Lexer.start lexbuf
+        ) in
+    let criteria = 
+        if !opt_cri_filename = "" then None
+        else Some (
+            let file_channel = open_in !opt_cri_filename in
+            let lexbuf = Lexing.from_channel file_channel in
+            Parser.program Lexer.start lexbuf
+        ) in
+    let target =
+        if !opt_trg_filename = "" then None
+        else Some (
+            let file_channel = open_in !opt_trg_filename in
+            let lexbuf = Lexing.from_channel file_channel in
+            Parser.program Lexer.start lexbuf
+        ) in
+    match pgm, criteria, target with
+    | Some e, None, None -> run e
+    | None, Some e1, Some e2 -> raise (Failure "Not Implemented")
+    | _ -> print_endline (usage_msg)
 
 let _ = main ()
