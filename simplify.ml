@@ -8,7 +8,12 @@ let simplify_val v =
   | Error _ | EoR _ -> v
   | _ -> let expr = val2expr v in let expr = simplify expr None in expr2val expr
 
+  
 let simplify_path : path_exp -> path_exp
-= fun p -> let expr = path2expr p in let expr = simplify expr None in let assertions = get_assertion expr in expr2path expr
+= fun p -> 
+  let expr = path2expr p in let expr = simplify expr None in 
+  let assertions = get_assertion expr in 
+  let assertions = List.map expr2path assertions in
+  expr2path expr
 
 
