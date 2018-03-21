@@ -1,5 +1,7 @@
 open Lang
 open Z3_translator
+open Z3
+open Z3.Expr
 open Z3.Solver
 
 let rec find_sym_var : sym_env-> var -> sym_env =
@@ -33,6 +35,13 @@ let sat_check : path_cond -> bool
   | UNSATISFIABLE -> false
   | UNKNOWN -> false
   | SATISFIABLE -> true
+
+let get_assertion : Expr.expr -> Solver.solver ->Expr.expr list
+= fun exp ->
+  let ctx = new_ctx () in
+  let solver = mk_solver ctx None in
+  let _ = Z3.Solver.add solver [exp] in
+  Z3.Solver.get_assertions
 
 let solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
 = fun t1 t2 -> raise (Failure "solve: Not Implemented") (* TODO *)

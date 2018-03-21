@@ -178,10 +178,3 @@ let rec expr2path : Expr.expr -> path_exp
   | OP_GT -> let [hd; tl] = Expr.get_args expr in GREATTHAN (expr2val hd, expr2val tl)
   | _ -> raise (Failure "expr2path: Not Implemented")
 
-(*let rec get_path_sat_aux : Solver.solver -> Expr.expr -> unit
-= fun sol expr -> Z3.Solver.add sol (Z3.Expr.get_args expr)
-
-let get_path_sat : Expr.expr -> unit
-= fun expr -> get_path_sat_aux (new_solver ()) expr
-*)
-
