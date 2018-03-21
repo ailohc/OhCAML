@@ -13,6 +13,7 @@ $ ./build
 ```
 
 ## Run
+```
 Usage: main.native <options> <file>
 
 options description
@@ -21,7 +22,8 @@ options description
 --criteria <file>     compare with 'target' file
 --target <file>       compare with 'criteria' file
 --counter             make counter example that make different output
-  
+```
+For example,
 ```
 $ ./main.native --run testcase/quadruple.m
 ```
