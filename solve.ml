@@ -36,8 +36,7 @@ let sat_check : path_cond -> bool
   | UNKNOWN -> false
   | SATISFIABLE -> true
 
-let get_assertion : Expr.expr -> Expr.expr list 
-= fun exp -> 
+let get_assertion exp =
   let ctx = new_ctx () in
   let solver = mk_solver ctx None in
   let _ = Z3.Solver.add solver [exp] in
