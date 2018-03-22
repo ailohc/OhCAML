@@ -9,6 +9,7 @@ let prog_equal : exp -> exp -> unit
 = fun p1 p2 ->
   init_sym_cnt ();
   let r1 = sym_eval p1 empty_env default_path_cond in
+  let _ = init_sym_cnt() in
   let r2 = sym_eval p2 empty_env default_path_cond in
   let to_solve1 = list_simplify r1 in
   let to_solve2 = list_simplify r2 in
