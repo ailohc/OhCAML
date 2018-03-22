@@ -43,6 +43,7 @@ let run : program -> unit
     print_aux r 1
 
 let usage_msg = "'main.native -h' for help"
+
 let main () =
     let _ = Arg.parse options (fun s -> ()) usage_msg in
     if !opt_help then begin
@@ -84,6 +85,6 @@ let main () =
     match pgm, criteria, target with
     | Some e, None, None -> run e
     | None, Some e1, Some e2 -> prog_equal e1 e2
-    | _ -> print_endline (usage_msg)
+    | _ -> print_endline ("Please check the arguments are correct"); print_endline (usage_msg)
 
 let _ = main ()
