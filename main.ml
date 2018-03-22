@@ -14,6 +14,7 @@ let prog_equal : exp -> exp -> unit
   let to_solve2 = list_simplify r2 in
   print_endline (string_of_bool (solve to_solve1 to_solve2))
 
+
 (* equality comparison between functions *)
 let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
 = fun f1 args1 f2 args2 ->
@@ -28,7 +29,7 @@ let run : program -> unit
 = fun pgm ->
     let rec print_aux : (sym_value * path_cond) list -> int -> unit
     = fun l cnt -> 
-       match l with 
+        match l with 
         | [] -> print_newline ()
         | (v, pi)::tl ->
             print_endline ("<" ^ string_of_int cnt ^ ">");
