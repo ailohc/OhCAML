@@ -38,7 +38,7 @@ let sat_check : path_cond -> bool
 
 
 let rec sym_val_check : sym_value -> sym_value -> bool
-    = fun s1 s2 -> if sat_val_check (EQUAL (s1, s2)) then true else false
+    = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
 
 let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> bool
 = fun v1 v2_list ->
