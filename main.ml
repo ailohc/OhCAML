@@ -24,17 +24,14 @@ let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
 (* simple symbolic eval *)
 let run : program -> unit
 = fun pgm ->
-    let target_lst = [] in 
     let rec print_aux : (sym_value * path_cond) list -> int -> unit
     = fun l cnt -> 
-       match l with 
+        match l with 
         | [] -> print_newline ()
         | (v, pi)::tl ->
             print_endline ("<" ^ string_of_int cnt ^ ">");
             print_endline ("path condition: " ^ cond2str (simplify_path (pi)));
             print_endline ("value: " ^ value2str (simplify_val (v)));
-            let target_lst = make_list (simplify_val (v)) (simplify_path (pi)) target_lst in
-            print_endline (string_of_bool (solve target_lst target_lst));
             print_newline ();
             print_aux tl (cnt + 1)
     in
