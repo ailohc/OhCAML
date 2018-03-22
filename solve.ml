@@ -1,6 +1,7 @@
 open Lang
 open Z3_translator
 open Z3.Solver
+open Z3.Expr
 open Z3enums
 
 exception CannotCompare
@@ -45,6 +46,15 @@ let is_true_check : path_cond -> bool
     if is_true=0 then begin true end else begin false end
 *)
 
+let rec path_equal_check : path_cond -> path_cond -> bool
+  = fun p1 p2 ->
+  let ctx = new_ctx () in
+  let expr1 = path2expr_aux ctx p1 in
+  let expr2 = path2expr_aux ctx p2 in
+  let expr1 = simplify expr1 None in
+  let expr2 = simplify expr2 None in
+  Z3.Expr.equal expr1 expr2
+
 let rec sym_val_check : sym_value -> sym_value -> bool
     = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
 
@@ -54,7 +64,7 @@ let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> b
   | [] -> false
   | (s2, p2)::tl -> 
     match v1 with
-    | (s1, p1) -> if p1=p2 then begin sym_val_check s1 s2 end else begin solve_aux v1 tl end
+    | (s1, p1) -> if path_equal_check p1 p2 then begin sym_val_check s1 s2 end else begin solve_aux v1 tl end
     | _ -> raise CannotCompare
 
 let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
