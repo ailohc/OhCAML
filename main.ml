@@ -5,12 +5,12 @@ open Solve
 open Simplify
 
 (* equality comparison between programs *)
-let prog_equal : exp -> exp -> bool
+let prog_equal : exp -> exp -> unit
 = fun p1 p2 ->
   init_sym_cnt ();
   let r1 = sym_eval p1 empty_env default_path_cond in
   let r2 = sym_eval p2 empty_env default_path_cond in
-  solve r1 r2
+  (* solve r1 r2 *) print_endline("Not Implemented")
 
 (* equality comparison between functions *)
 let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
@@ -45,12 +45,17 @@ let main () =
     if !opt_help then begin
         print_endline ("OhCAML: OhCAML is Checking Assistant for ML");
         print_endline ("Usage: main.native <options> <file>"); print_newline ();
-        print_endline ("option description");
-        print_endline ("    -h                  help");
+        print_endline ("<option description>");
+        print_endline ("    --help              help");
+        print_endline ("    -h"); print_newline ();
         print_endline ("    --run <file>        print result of symbolic execution");
+        print_endline ("    -r <file>"); print_newline ();
         print_endline ("    --criteria <file>   compare with 'target' file");
+        print_endline ("    -c <file>"); print_newline ();
         print_endline ("    --target <file>     compare with 'criteria' file");
-        print_endline ("    --counter           make counter example that make different output")
+        print_endline ("    -t <file>"); print_newline ();
+        print_endline ("    --example           make counter example that make different output");
+        print_endline ("    -e")
     end else
     let pgm =
         if !opt_run = "" then None
@@ -75,7 +80,7 @@ let main () =
         ) in
     match pgm, criteria, target with
     | Some e, None, None -> run e
-    | None, Some e1, Some e2 -> raise (Failure "Not Implemented")
+    | None, Some e1, Some e2 -> prog_equal e1 e2
     | _ -> print_endline (usage_msg)
 
 let _ = main ()
