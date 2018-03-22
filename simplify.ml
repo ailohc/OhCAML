@@ -10,3 +10,9 @@ let simplify_val : sym_value -> sym_value
 
 let simplify_path : path_exp -> path_exp
 = fun p -> let expr = path2expr p in let expr = simplify expr None in expr2path expr
+
+let rec list_simplify : (sym_value * path_cond) list -> (sym_value * path_cond) list
+= fun lst ->
+    match lst with
+    | [] -> []
+    | (s, p)::tl -> (simplify_val (s), simplify_path (p))::(list_simplify tl)

@@ -5,12 +5,14 @@ open Solve
 open Simplify
 
 (* equality comparison between programs *)
-let prog_equal : exp -> exp -> bool
+let prog_equal : exp -> exp -> unit
 = fun p1 p2 ->
   init_sym_cnt ();
   let r1 = sym_eval p1 empty_env default_path_cond in
   let r2 = sym_eval p2 empty_env default_path_cond in
-  solve r1 r2
+  let to_solve1 = list_simplify r1 in
+  let to_solve2 = list_simplify r2 in
+  print_endline (string_of_bool (solve to_solve1 to_solve2))
 
 (* equality comparison between functions *)
 let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
@@ -20,12 +22,6 @@ let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
   let env2 = init_sym_cnt (); gen_senv args2 empty_env in
   let r2 = sym_eval f2 env2 default_path_cond in
   solve r1 r2
-
-let rec list_simplify : (sym_value * path_cond) list -> (sym_value * path_cond) list
-= fun lst ->
-    match lst with
-    | [] -> []
-    | (s, p)::tl -> (simplify_val (s), simplify_path (p))::(list_simplify tl)
 
 (* simple symbolic eval *)
 let run : program -> unit
@@ -42,22 +38,25 @@ let run : program -> unit
             print_aux tl (cnt + 1)
     in
     let r = sym_eval pgm empty_env default_path_cond in
-    let to_solve = list_simplify r in
-    print_aux r 1; print_endline (string_of_bool (solve r r)); print_endline (string_of_bool (solve to_solve to_solve))
+    print_aux r 1
 
 let usage_msg = "'main.native -h' for help"
-
 let main () =
     let _ = Arg.parse options (fun s -> ()) usage_msg in
     if !opt_help then begin
         print_endline ("OhCAML: OhCAML is Checking Assistant for ML");
         print_endline ("Usage: main.native <options> <file>"); print_newline ();
-        print_endline ("option description");
-        print_endline ("    -h                  help");
+        print_endline ("<option description>");
+        print_endline ("    --help              help");
+        print_endline ("    -h"); print_newline ();
         print_endline ("    --run <file>        print result of symbolic execution");
+        print_endline ("    -r <file>"); print_newline ();
         print_endline ("    --criteria <file>   compare with 'target' file");
+        print_endline ("    -c <file>"); print_newline ();
         print_endline ("    --target <file>     compare with 'criteria' file");
-        print_endline ("    --counter           make counter example that make different output")
+        print_endline ("    -t <file>"); print_newline ();
+        print_endline ("    --example           make counter example that make different output");
+        print_endline ("    -e")
     end else
     let pgm =
         if !opt_run = "" then None
@@ -82,7 +81,7 @@ let main () =
         ) in
     match pgm, criteria, target with
     | Some e, None, None -> run e
-    | None, Some e1, Some e2 -> raise (Failure "Not Implemented")
+    | None, Some e1, Some e2 -> prog_equal e1 e2
     | _ -> print_endline (usage_msg)
 
 let _ = main ()
