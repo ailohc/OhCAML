@@ -17,7 +17,7 @@ $ ./build
 Usage: main.native <options> <file>
 
 options description
--h                    help
+--help                help
 --run <file>          print result of symbolic execution
 --criteria <file>     compare with 'target' file
 --target <file>       compare with 'criteria' file
