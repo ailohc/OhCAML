@@ -36,16 +36,17 @@ let sat_check : path_cond -> bool
   | UNSATISFIABLE -> false
   | UNKNOWN -> false
   | SATISFIABLE -> true
-
+(*
 let is_true_check : path_cond -> bool
   = fun pi ->
   let ctx = new_ctx () in
   let expr = path2expr_aux ctx pi in
   let is_true = Z3enums.int_of_lbool (Z3.Boolean.get_bool_value expr) in
     if is_true=0 then begin true end else begin false end
+*)
 
 let rec sym_val_check : sym_value -> sym_value -> bool
-    = fun s1 s2 -> if is_true_check (EQUAL (s1, s2)) then true else false
+    = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
 
 let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> bool
 = fun v1 v2_list ->
@@ -53,7 +54,7 @@ let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> b
   | [] -> false
   | (s2, p2)::tl -> 
     match v1 with
-    | (s1, p1) -> if is_true_check (PATHEQ (p1, p2))(*maybe right*) then begin sym_val_check s1 s2 end else begin solve_aux v1 tl end
+    | (s1, p1) -> if p1=p2 then begin sym_val_check s1 s2 end else begin solve_aux v1 tl end
     | _ -> raise CannotCompare
 
 let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
