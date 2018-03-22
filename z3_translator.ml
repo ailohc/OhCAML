@@ -137,6 +137,7 @@ let rec path2expr_aux : context -> path_exp -> Expr.expr
   | LESSEQ (p1, p2) -> le ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
   | GREATTHAN (p1, p2) -> gt ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
   | GREATEQ (p1, p2) -> ge ctx (val2expr_aux ctx p1) (val2expr_aux ctx p2)
+  | ANDL l -> Z3.Boolean.mk_and ctx (map (fun p -> path2expr_aux ctx p) l)
   | PATHEQ (p1, p2) -> eq ctx (path2expr_aux ctx p1) (path2expr_aux ctx p2)
   | _ -> raise NotComputableValue
 
@@ -178,3 +179,4 @@ let rec expr2path : Expr.expr -> path_exp
   | OP_LT -> let [hd; tl] = Expr.get_args expr in LESSTHAN (expr2val hd, expr2val tl)
   | OP_GT -> let [hd; tl] = Expr.get_args expr in GREATTHAN (expr2val hd, expr2val tl)
   | _ -> raise (Failure "expr2path: Not Implemented")
+
