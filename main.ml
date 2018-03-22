@@ -10,7 +10,10 @@ let prog_equal : exp -> exp -> unit
   init_sym_cnt ();
   let r1 = sym_eval p1 empty_env default_path_cond in
   let r2 = sym_eval p2 empty_env default_path_cond in
-  (* solve r1 r2 *) print_endline("Not Implemented")
+  let to_solve1 = list_simplify r1 in
+  let to_solve2 = list_simplify r2 in
+  print_endline (string_of_bool (solve to_solve1 to_solve2))
+
 
 (* equality comparison between functions *)
 let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
@@ -39,7 +42,6 @@ let run : program -> unit
     print_aux r 1
 
 let usage_msg = "'main.native -h' for help"
-
 let main () =
     let _ = Arg.parse options (fun s -> ()) usage_msg in
     if !opt_help then begin

@@ -45,7 +45,7 @@ let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> b
   | [] -> false
   | (s2, p2)::tl -> 
     match v1 with
-    | (s1, p1) -> if sat_check (PATHEQ (p1, p2)) then sym_val_check s1 s2 else solve_aux v1 tl 
+    | (s1, p1) -> if p1 = p2(*should modify*) then sym_val_check s1 s2 else solve_aux v1 tl 
     | _ -> raise CannotCompare
 
 let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
