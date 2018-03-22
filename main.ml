@@ -25,7 +25,7 @@ let rec list_simplify : (sym_value * path_cond) list -> (sym_value * path_cond) 
 = fun lst ->
     match lst with
     | [] -> []
-    | (s, p)::tl -> (simplify_val (s) , simplify_path (p))::(list_simplify tl)
+    | (s, p)::tl -> (simplify_val (s), simplify_path (p))::(list_simplify tl)
 
 (* simple symbolic eval *)
 let run : program -> unit
@@ -43,7 +43,7 @@ let run : program -> unit
     in
     let r = sym_eval pgm empty_env default_path_cond in
     let to_solve = list_simplify r in
-    print_aux r 1; print_endline (string_of_bool (solve to_solve to_solve))
+    print_aux r 1; print_endline (string_of_bool (solve r r)); print_endline (string_of_bool (solve to_solve to_solve))
 
 let usage_msg = "'main.native -h' for help"
 

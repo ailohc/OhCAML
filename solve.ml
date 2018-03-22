@@ -37,7 +37,7 @@ let sat_check : path_cond -> bool
   | SATISFIABLE -> true
 
 let rec sym_val_check : sym_value -> sym_value -> bool
-    = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
+    = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false 
 
 let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> bool
 = fun v1 v2_list ->
@@ -45,7 +45,7 @@ let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> b
   | [] -> false
   | (s2, p2)::tl -> 
     match v1 with
-    | (s1, p1) -> if sat_check (PATHEQ (p1, p2)) then sym_val_check s1 s2 else solve_aux v1 tl 
+    | (s1, p1) -> if p1 = p2(*should modify*) then sym_val_check s1 s2 else solve_aux v1 tl 
     | _ -> raise CannotCompare
 
 let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
