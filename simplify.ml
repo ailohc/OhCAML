@@ -10,3 +10,6 @@ let simplify_val : sym_value -> sym_value
 
 let simplify_path : path_exp -> path_exp
 = fun p -> let expr = path2expr p in let expr = simplify expr None in expr2path expr
+
+let make_list : sym_value -> path_exp -> (sym_value * path_exp) list -> (sym_value * path_exp) list 
+= fun sv pv lst -> [(sv , pv)]@lst
