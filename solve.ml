@@ -39,6 +39,17 @@ let sat_check : path_cond -> bool
   | UNKNOWN -> false
   | SATISFIABLE -> true
 
+let val_check : path_cond -> bool
+  = fun pi ->
+    let ctx = new_ctx () in
+    let expr = path2expr_aux ctx pi in
+    let solver = mk_solver ctx None in
+    let _ = Z3.Solver.add solver [expr] in
+    match (check solver []) with
+    | UNSATISFIABLE -> true
+    | UNKNOWN -> false
+    | SATISFIABLE -> false
+  
 let rec path_equal_check : path_cond -> path_cond -> bool
   = fun p1 p2 ->
   let ctx = new_ctx () in
@@ -49,7 +60,7 @@ let rec path_equal_check : path_cond -> path_cond -> bool
   Z3.Expr.equal expr1 expr2
 
 let rec sym_val_check : sym_value -> sym_value -> bool
-    = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
+    = fun s1 s2 -> if val_check (NOT (EQUAL (s1, s2))) then true else false
 
 let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> bool
 = fun v1 v2_list ->
@@ -57,7 +68,7 @@ let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> b
   | [] -> false
   | (s2, p2)::tl -> 
     match v1 with
-    | (s1, p1) -> if path_equal_check p1 p2 then begin sym_val_check s1 s2 end else begin solve_aux v1 tl end
+    | (s1, p1) -> if sat_check (NOT (PATHEQ (p1, p2))) then begin solve_aux v1 tl end else begin sym_val_check s1 s2 end
     | _ -> raise CannotCompare
 
 let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
