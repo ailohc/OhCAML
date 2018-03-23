@@ -1,0 +1,1 @@
+let quad = proc (n) (4 * n) in (quad read)
