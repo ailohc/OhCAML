@@ -1,4 +1,5 @@
 open Lang
+open Util
 open Z3_translator
 open Z3.Solver
 open Z3.Expr
@@ -39,29 +40,36 @@ let sat_check : path_cond -> bool
   | UNKNOWN -> false
   | SATISFIABLE -> true
 
-let rec path_equal_check : path_cond -> path_cond -> bool
-  = fun p1 p2 ->
-  let ctx = new_ctx () in
-  let expr1 = path2expr_aux ctx p1 in
-  let expr2 = path2expr_aux ctx p2 in
-  let expr1 = simplify expr1 None in
-  let expr2 = simplify expr2 None in
-  Z3.Expr.equal expr1 expr2
-
-let rec sym_val_check : sym_value -> sym_value -> bool
-    = fun s1 s2 -> if sat_check (EQUAL (s1, s2)) then true else false
-
-let rec solve_aux : (sym_value * path_cond) -> (sym_value * path_cond) list -> bool
-= fun v1 v2_list ->
-  match v2_list with
-  | [] -> false
-  | (s2, p2)::tl -> 
-    match v1 with
-    | (s1, p1) -> if path_equal_check p1 p2 then begin sym_val_check s1 s2 end else begin solve_aux v1 tl end
-    | _ -> raise CannotCompare
-
-let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
-= fun v1_list v2_list ->
-  match v1_list with
-  | [] -> true
-  | (s1, p1)::tl -> (solve_aux (s1, p1) v2_list) && (solve tl v2_list)
+  let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
+= fun l1 l2 ->
+  let ctx = Z3.mk_context [] in
+  let r = 
+    match l1 with
+    | [] -> raise (Failure "NotRunnable")
+    | hd::tl -> let (v, _) = hd in Z3_translator.mk_const ctx "return" (
+        if is_int v then Z3_translator.int_sort ctx
+        else Z3_translator.bool_sort ctx
+      )
+  in
+  let e1 = fold (
+    fun tup rst ->
+    let (v, pi) = tup in
+    let eq_value = Z3_translator.eq ctx r (val2expr_aux ctx v) in
+    let exp_pi = path2expr_aux ctx pi in
+    let exp = Z3_translator.and_b ctx eq_value exp_pi in
+    Z3_translator.or_b ctx exp rst
+  ) l1 (Z3_translator.const_b ctx false) in
+  let e2 = fold (
+    fun tup rst ->
+    let (v, pi) = tup in
+    let eq_value = Z3_translator.eq ctx r (val2expr_aux ctx v) in
+    let exp_pi = path2expr_aux ctx pi in
+    let exp = Z3_translator.and_b ctx eq_value exp_pi in
+    Z3_translator.or_b ctx exp rst
+  ) l2 (Z3_translator.const_b ctx false)  in
+  let expr = Z3_translator.neq ctx e1 e2 in
+  let solver = mk_solver ctx None in
+  let _ = Z3.Solver.add solver [expr] in
+  match (check solver []) with
+  | UNSATISFIABLE -> true
+  | _ -> false
