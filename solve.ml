@@ -2,6 +2,7 @@ open Lang
 open Z3_translator
 open Z3.Solver
 open Z3.Expr
+open Z3.Proof
 open Z3enums
 
 exception CannotCompare
@@ -37,14 +38,6 @@ let sat_check : path_cond -> bool
   | UNSATISFIABLE -> false
   | UNKNOWN -> false
   | SATISFIABLE -> true
-(*
-let is_true_check : path_cond -> bool
-  = fun pi ->
-  let ctx = new_ctx () in
-  let expr = path2expr_aux ctx pi in
-  let is_true = Z3enums.int_of_lbool (Z3.Boolean.get_bool_value expr) in
-    if is_true=0 then begin true end else begin false end
-*)
 
 let rec path_equal_check : path_cond -> path_cond -> bool
   = fun p1 p2 ->
