@@ -85,8 +85,10 @@ let rec find env x =
   | (y, v)::tl -> if y = x then v else find tl x
 let append env (x, v) = (x, v)::env
 
-let rec fix_point : 'a -> ('a -> 'a) -> 'a
-= fun x f-> let next = f x in if x = next then x else fix_point next f
+let is_int v =
+  match v with
+  | Int _ | SInt _ | SExp _ | SMinus _  | Sum _ | Product _ -> true
+  | _ -> false
 
 let rec value2str : sym_value -> string
 = fun v ->
