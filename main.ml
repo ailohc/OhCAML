@@ -22,17 +22,19 @@ let prog_equal : exp -> exp -> bool -> unit
         print_endline ("two programs are not equivalent");
         if not counter then ()
         else
-        print_endline ("different results come when");
-        let ctr_ex = gen_counter_ex solver in
-        match ctr_ex with
-        | [] -> print_endline ("Can't find counter example")
-        | hd::tl ->
-            let rec print_aux : (sym_value * sym_value) list -> unit
-            = fun l ->
-                match l with
-                | [] -> print_newline ()
-                | (v, x)::tl -> print_endline (value2str v ^ " = " ^ value2str x); print_aux tl
-            in print_aux ctr_ex
+        begin
+            let _ = print_endline ("different results come when") in
+            let ctr_ex = gen_counter_ex solver in
+            match ctr_ex with
+            | [] -> print_endline ("Can't find counter example")
+            | hd::tl ->
+                let rec print_aux : (sym_value * sym_value) list -> unit
+                = fun l ->
+                    match l with
+                    | [] -> print_newline ()
+                    | (v, x)::tl -> print_endline (value2str v ^ " = " ^ value2str x); print_aux tl
+                in print_aux ctr_ex
+        end
     end
 
 (* equality comparison between functions *)

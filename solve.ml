@@ -74,4 +74,20 @@ let rec solve : context -> solver -> (sym_value * path_cond) list -> (sym_value 
   | _ -> false
 
 let gen_counter_ex : solver -> (sym_value * sym_value) list
-= fun solver -> raise (Failure "gen_counter_ex: Not Implemented")
+= fun solver ->
+  let rec mk_eqs : 'a list -> 'b list -> ('a * 'b) list -> ('a * 'b) list
+  = fun a_list b_list r ->
+    match a_list, b_list with
+    | [], [] -> r
+    | h1::t1, h2::t2 -> mk_eqs t1 t2 (r@[(h1, h2)])
+    | _ -> []
+  in
+  let m = Solver.get_model solver in
+  if m = None then []
+  else let Some m = m in
+  let l = Model.get_const_decls m in
+  let r = map (fun decl -> let t = Model.get_const_interp m decl in let Some t = t in t) l in
+  let l = map funcdecl2val l in
+  let r = map expr2val r in
+  mk_eqs l r []
+  
