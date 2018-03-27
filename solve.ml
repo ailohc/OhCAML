@@ -1,7 +1,7 @@
 open Lang
 open Util
-open Z3
 open Z3_translator
+open Z3
 open Z3.Solver
 open Z3.Expr
 open Z3.Proof
