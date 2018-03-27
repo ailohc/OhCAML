@@ -5,16 +5,37 @@ open Solve
 open Simplify
 
 (* equality comparison between programs *)
-let prog_equal : exp -> exp -> unit
-= fun p1 p2 ->
-  init_sym_cnt ();
+let prog_equal : exp -> exp -> bool -> unit
+= fun p1 p2 counter ->
+  let _ = init_sym_cnt () in
   let r1 = sym_eval p1 empty_env default_path_cond in
-  let _ = init_sym_cnt() in
+  let _ = init_sym_cnt () in
   let r2 = sym_eval p2 empty_env default_path_cond in
   let to_solve1 = list_simplify r1 in
   let to_solve2 = list_simplify r2 in
-  print_endline (string_of_bool (solve to_solve1 to_solve2))
-
+  let ctx = Z3_translator.new_ctx () in
+  let solver = Z3.Solver.mk_solver ctx None in
+  match solve ctx solver to_solve1 to_solve2 with
+  | true -> print_endline ("two programs are equivalent")
+  | false ->
+    begin
+        print_endline ("two programs are not equivalent");
+        if not counter then ()
+        else
+        begin
+            let _ = print_endline ("different results come when") in
+            let ctr_ex = gen_counter_ex solver in
+            match ctr_ex with
+            | [] -> print_endline ("Can't find counter example")
+            | hd::tl ->
+                let rec print_aux : (sym_value * sym_value) list -> unit
+                = fun l ->
+                    match l with
+                    | [] -> print_newline ()
+                    | (v, x)::tl -> print_endline (value2str v ^ " = " ^ value2str x); print_aux tl
+                in print_aux ctr_ex
+        end
+    end
 
 (* equality comparison between functions *)
 let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
@@ -23,7 +44,9 @@ let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
   let r1 = sym_eval f1 env1 default_path_cond in
   let env2 = init_sym_cnt (); gen_senv args2 empty_env in
   let r2 = sym_eval f2 env2 default_path_cond in
-  solve r1 r2
+  let ctx = Z3_translator.new_ctx () in
+  let solver = Z3.Solver.mk_solver ctx None in
+  solve ctx solver r1 r2
 
 (* simple symbolic eval *)
 let run : program -> unit
@@ -84,7 +107,7 @@ let main () =
         ) in
     match pgm, criteria, target with
     | Some e, None, None -> run e
-    | None, Some e1, Some e2 -> prog_equal e1 e2
+    | None, Some e1, Some e2 -> prog_equal e1 e2 !opt_gen_counter_example
     | _ -> print_endline ("Please check the arguments are correct"); print_endline (usage_msg)
 
 let _ = main ()

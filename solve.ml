@@ -1,5 +1,6 @@
 open Lang
 open Util
+open Z3
 open Z3_translator
 open Z3.Solver
 open Z3.Expr
@@ -40,9 +41,8 @@ let sat_check : path_cond -> bool
   | UNKNOWN -> false
   | SATISFIABLE -> true
 
-  let rec solve : (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
-= fun l1 l2 ->
-  let ctx = Z3.mk_context [] in
+let rec solve : context -> solver -> (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
+= fun ctx solver l1 l2 ->
   let r = 
     match l1 with
     | [] -> raise (Failure "NotRunnable")
@@ -68,8 +68,26 @@ let sat_check : path_cond -> bool
     Z3_translator.or_b ctx exp rst
   ) l2 (Z3_translator.const_b ctx false)  in
   let expr = Z3_translator.neq ctx e1 e2 in
-  let solver = mk_solver ctx None in
   let _ = Z3.Solver.add solver [expr] in
   match (check solver []) with
   | UNSATISFIABLE -> true
   | _ -> false
+
+let gen_counter_ex : solver -> (sym_value * sym_value) list
+= fun solver ->
+  let rec mk_eqs : 'a list -> 'b list -> ('a * 'b) list -> ('a * 'b) list
+  = fun a_list b_list r ->
+    match a_list, b_list with
+    | [], [] -> r
+    | h1::t1, h2::t2 -> mk_eqs t1 t2 (r@[(h1, h2)])
+    | _ -> []
+  in
+  let m = Solver.get_model solver in
+  if m = None then []
+  else let Some m = m in
+  let l = Model.get_const_decls m in
+  let r = map (fun decl -> let t = Model.get_const_interp m decl in let Some t = t in t) l in
+  let l = map funcdecl2val l in
+  let r = map expr2val r in
+  mk_eqs l r []
+  

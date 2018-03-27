@@ -68,6 +68,8 @@ type sym_value =
   (* simplify *)
   | Sum of sym_value list
   | Product of sym_value list
+  (* gen counter example *)
+  | Return
 and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
@@ -115,6 +117,7 @@ let rec value2str : sym_value -> string
   | Error s -> "Error: " ^ s
   | Sum l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " + ") ^ s2) l ")"
   | Product l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " * ") ^ s2) l ")"
+  | Return -> "output"
 
 type path_exp =
   (* boolean exp *)

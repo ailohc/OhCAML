@@ -180,3 +180,20 @@ let rec expr2path : Expr.expr -> path_exp
   | OP_GT -> let [hd; tl] = Expr.get_args expr in GREATTHAN (expr2val hd, expr2val tl)
   | _ -> raise (Failure "expr2path: Not Implemented")
 
+let funcdecl2val : FuncDecl.func_decl -> sym_value
+= fun f ->
+  let op = FuncDecl.get_decl_kind f in
+  match op with
+  | OP_UNINTERPRETED -> (* symbol *)
+    begin
+      let str = Symbol.get_string (FuncDecl.get_name f) in
+      let l = Str.split (Str.regexp "_") str in
+      match l with
+      | ["return"] -> Return
+      | [hd; tl] ->
+        if hd = "alpha" then SInt (int_of_string tl)
+        else if tl = "beta" then SBool (int_of_string tl)
+        else raise (Failure "SHOULD NOT COME HERE")
+      | _ -> raise (Failure "SHOULD NOT COME HERE")
+    end
+  | _ -> raise (Failure "funcdecl2eq: Not Implemented")
