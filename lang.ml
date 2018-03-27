@@ -92,6 +92,11 @@ let is_int v =
   | Int _ | SInt _ | SExp _ | SMinus _  | Sum _ | Product _ -> true
   | _ -> false
 
+let is_error v =
+  match v with
+  | EoR _ | Error _ -> true
+  | _ -> false
+
 let rec value2str : sym_value -> string
 = fun v ->
   match v with
