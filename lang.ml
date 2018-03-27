@@ -117,7 +117,7 @@ let rec value2str : sym_value -> string
   | Error s -> "Error: " ^ s
   | Sum l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " + ") ^ s2) l ")"
   | Product l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " * ") ^ s2) l ")"
-  | Return -> "output"
+  | Return -> "expected output"
 
 type path_exp =
   (* boolean exp *)
