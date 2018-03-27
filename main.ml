@@ -23,7 +23,7 @@ let prog_equal : exp -> exp -> bool -> unit
         if not counter then ()
         else
         begin
-            let _ = print_endline ("different results come when") in
+            let _ = print_newline (); print_endline ("different results come when") in
             let ctr_ex = gen_counter_ex solver in
             match ctr_ex with
             | [] -> print_endline ("Can't find counter example")
@@ -32,7 +32,7 @@ let prog_equal : exp -> exp -> bool -> unit
                 = fun l ->
                     match l with
                     | [] -> print_newline ()
-                    | (v, x)::tl -> print_endline (value2str v ^ " = " ^ value2str x); print_aux tl
+                    | (v, x)::tl -> print_endline ("  " ^ value2str v ^ ": " ^ value2str x); print_aux tl
                 in print_aux ctr_ex
         end
     end
@@ -105,7 +105,7 @@ let main () =
             let lexbuf = Lexing.from_channel file_channel in
             Parser.program Lexer.start lexbuf
         ) in
-    match pgm, criteria, target with
+    match pgm, target, criteria with
     | Some e, None, None -> run e
     | None, Some e1, Some e2 -> prog_equal e1 e2 !opt_gen_counter_example
     | _ -> print_endline ("Please check the arguments are correct"); print_endline (usage_msg)
