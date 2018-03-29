@@ -48,7 +48,7 @@ let rec solve : context -> solver -> (sym_value * path_cond) list -> (sym_value 
     | [] -> raise (Failure "NotRunnable")
     | hd::tl -> let (v, _) = hd in Z3_translator.mk_const ctx "return" (
         if is_int v then (print_endline(value2str v); Z3_translator.int_sort ctx)
-        else if is_error v then Z3_translator.string_sort ctx
+        else if is_error v then Z3_translator.string_sort ctx (* TODO *)
         else Z3_translator.bool_sort ctx
       )
   in

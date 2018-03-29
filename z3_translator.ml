@@ -36,6 +36,9 @@ let not_b ctx expr = Z3.Boolean.mk_not ctx expr
 let eq ctx expr1 expr2 = Z3.Boolean.mk_eq ctx expr1 expr2
 let neq ctx expr1 expr2 = (not_b ctx (eq ctx expr1 expr2))
 
+type result_code = RTRUE | RALSE | RERROR of error_code
+and result_env = result_code * int
+
 exception NotComputableValue
 
 let rec val2expr_aux : context -> sym_value -> Expr.expr
@@ -66,8 +69,7 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
       | [] -> val2expr_aux ctx (Int 1)
       | hd::tl -> mul ctx (val2expr_aux ctx hd) (val2expr_aux ctx (Product tl))
     end
-  | EoR f -> const_str ctx ("EndOfRec_" ^ f)
-  | Error m -> const_str ctx ("Error_" ^ m)
+  | Error t -> raise (Failure "NOT IMPLEMENTED")
   | Fun _ | FunRec _ | SVar _ | SFun _ | SFunApp _ -> raise NotComputableValue
 
 let val2expr : sym_value -> Expr.expr

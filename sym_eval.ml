@@ -3,8 +3,6 @@ open Solve
 
 exception SyntaxError
 
-let divByZero = Error "/ by zero"
-
 let rec sym_eval_aux : (sym_value * path_cond) list -> (sym_value -> path_cond -> (sym_value * path_cond) list) -> (sym_value * path_cond) list
 = fun l f ->
   match l with
@@ -29,7 +27,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
           | Int n1, Int n2 -> [(Int (n1 + n2), pi)]
           | _ -> [(SExp (SADD, v1, v2), pi)]
@@ -45,7 +42,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
           | Int n1, Int n2 -> [(Int (n1 - n2), pi)]
           | _ -> [(SExp (SSUB, v1, v2), pi)]
@@ -61,7 +57,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
             | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
             | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-            | EoR f, _ | _, EoR f -> [(EoR f, pi)]
             | Error s, _ | _, Error s -> [(Error s, pi)]
             | Int n1, Int n2 -> [(Int (n1 * n2), pi)]
             | _ -> [(SExp (SMUL, v1, v2), pi)]
@@ -77,11 +72,10 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
-          | _, Int 0 -> [(divByZero, pi)]
+          | _, Int 0 -> [(Error DIVBYZERO, pi)]
           | Int n1, Int n2 -> [(Int (n1 / n2), pi)]
-          | _ -> [(SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0))); (divByZero, AND(pi, EQUAL(v2, Int 0)))]
+          | _ -> [(SExp (SDIV, v1, v2), AND(pi, NOTEQ(v2, Int 0))); (Error DIVBYZERO, AND(pi, EQUAL(v2, Int 0)))]
         )
     )
   | ISZERO e -> 
@@ -92,7 +86,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
       | Int 0 -> [(Bool true, pi)]
       | Int _ -> [(Bool false, pi)]
       | SInt _ | SExp _ -> [(Bool true, AND(pi, EQUAL(v, Int 0))); (Bool false, AND(pi, NOTEQ(v, Int 0)))]
-      | EoR _ | Error _ -> [(v, pi)]
+      | Error _ -> [(v, pi)]
       | _ -> raise SyntaxError
     )
   | LT (e1, e2) -> (*e1 < e2*)
@@ -105,7 +99,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
           | Int n1, Int n2 -> if n1 < n2 then [(Bool true, pi)] else [(Bool false, pi)]
           | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, LESSTHAN(v1, v2))); (Bool false, AND(pi, GREATEQ(v1, v2)))]
@@ -122,7 +115,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
           | Int n1, Int n2 -> if n1 <= n2 then [(Bool true, pi)] else [(Bool false, pi)]
           | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, LESSEQ(v1, v2))); (Bool false, AND(pi, GREATTHAN(v1, v2)))]
@@ -139,7 +131,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
           | Int n1, Int n2 -> if n1 > n2 then [(Bool true, pi)] else [(Bool false, pi)]
           | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, GREATTHAN(v1, v2))); (Bool false, AND(pi, LESSEQ(v1, v2)))]
@@ -156,7 +147,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           match v1, v2 with
           | Bool _, _ | Fun _, _ | FunRec _, _ | SBool _, _ | SVar _, _ | SFun _, _ -> raise SyntaxError
           | _, Bool _ | _, Fun _ | _, FunRec _ | _, SBool _ | _, SVar _ | _, SFun _ -> raise SyntaxError
-          | EoR f, _ | _, EoR f -> [(EoR f, pi)]
           | Error s, _ | _, Error s -> [(Error s, pi)]
           | Int n1, Int n2 -> if n1 >= n2 then [(Bool true, pi)] else [(Bool false, pi)]
           | SInt _, _ | _, SInt _ | SExp _, _ | _, SExp _ -> [(Bool true, AND(pi, GREATEQ(v1, v2))); (Bool false, AND(pi, LESSTHAN(v1, v2)))]
@@ -171,7 +161,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
       match b with
       | Bool b -> if b then sym_eval e1 env pi else sym_eval e2 env pi
       | SBool _ -> (sym_eval e1 env (AND (pi, EQUAL (b, Bool true))))@(sym_eval e2 env (AND (pi, EQUAL (b, Bool false))))
-      | EoR _ | Error _ -> [(b, pi)]
+      | Error _ -> [(b, pi)]
       | _ -> raise SyntaxError
     )
   | LET (x, e1, e2) ->
@@ -204,7 +194,7 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
         else
           let l = sym_eval e2 env pi in
           sym_eval_aux l (
-            fun v pi -> [(EoR f, pi)]
+            fun v pi -> [(Error (RECURSION f), pi)]
           )
       | SFun (id, t1, t2) ->
         let l = sym_eval e2 env pi in
@@ -222,6 +212,6 @@ let rec sym_eval : exp -> sym_env -> path_cond -> (sym_value * path_cond) list
           | _, SFunApp (_, _, t) -> if t = t1 then [(SFunApp (id, v, t2), pi)] else raise SyntaxError
           | _ -> raise SyntaxError
         )
-      | EoR _ | Error _ -> [(func, pi)]
+      | Error _ -> [(func, pi)]
       | _ -> raise SyntaxError
     )
