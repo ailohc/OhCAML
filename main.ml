@@ -1,3 +1,4 @@
+open Util
 open Lang
 open Options
 open Sym_eval
@@ -7,46 +8,62 @@ open Simplify
 (* equality comparison between programs *)
 let prog_equal : exp -> exp -> bool -> unit
 = fun p1 p2 counter ->
-  let _ = init_sym_cnt () in
-  let r1 = sym_eval p1 empty_env default_path_cond in
-  let _ = init_sym_cnt () in
-  let r2 = sym_eval p2 empty_env default_path_cond in
-  let to_solve1 = list_simplify r1 in
-  let to_solve2 = list_simplify r2 in
-  let ctx = Z3_translator.new_ctx () in
-  let solver = Z3.Solver.mk_solver ctx None in
-  match solve ctx solver to_solve1 to_solve2 with
-  | true -> print_endline ("two programs are equivalent")
-  | false ->
-    begin
-        print_endline ("two programs are not equivalent");
-        if not counter then ()
-        else
+    let rec split_error l rv re =
+        match l with
+        | [] -> (rv, re)
+        | hd::tl -> let (v, p) = hd in if is_error v then split_error tl rv (re@[hd]) else split_error tl (rv@[hd]) re
+    in
+    let gen_typ l =
+        match l with
+        | [] -> raise (Failure "No Value Outcome")
+        | (v, _)::tl -> if is_int v then TyInt else TyBool
+    in
+    let _ = init_sym_cnt () in
+    let r1 = sym_eval p1 empty_env default_path_cond in
+    let _ = init_sym_cnt () in
+    let r2 = sym_eval p2 empty_env default_path_cond in
+    let (rv1, re1) = split_error (list_simplify r1) [] [] in
+    let (rv2, re2) = split_error (list_simplify r2) [] [] in
+    let result_typ = gen_typ rv1 in
+    let (rv1, rv2) = if result_typ = TyInt then (rv1, rv2) else (map (fun (v, p) -> (res2int v, p)) rv1, map (fun (v, p) -> (res2int v, p)) rv2) in
+    let ctx = Z3_translator.new_ctx () in
+    let solver = Z3.Solver.mk_solver ctx None in
+    match solve ctx solver rv1 rv2 with
+    | true -> print_endline ("two programs are equivalent")
+    | false ->
         begin
-            let _ = print_newline (); print_endline ("different results come when") in
-            let ctr_ex = gen_counter_ex solver in
-            match ctr_ex with
-            | [] -> print_endline ("Can't find counter example")
-            | hd::tl ->
-                let rec print_aux : (sym_value * sym_value) list -> unit
-                = fun l ->
-                    match l with
-                    | [] -> print_newline ()
-                    | (v, x)::tl -> print_endline ("  " ^ value2str v ^ ": " ^ value2str x); print_aux tl
-                in print_aux ctr_ex
+            print_endline ("two programs are not equivalent");
+            if not counter then ()
+            else
+            begin
+                let _ = print_newline (); print_endline ("different results come when") in
+                let ctr_ex = gen_counter_ex solver in
+                match ctr_ex with
+                | [] -> print_endline ("Can't find counter example")
+                | hd::tl ->
+                    let rec print_aux : (sym_value * sym_value) list -> unit
+                    = fun l ->
+                        match l with
+                        | [] -> print_newline ()
+                        | (v, x)::tl ->
+                            begin
+                                let x = if v != Return || result_typ = TyInt then x else int2res x in
+                                print_endline ("  " ^ value2str v ^ ": " ^ value2str x); print_aux tl
+                            end
+                    in print_aux ctr_ex
+            end
         end
-    end
 
 (* equality comparison between functions *)
 let fun_equal : exp -> (var * typ) list -> exp -> (var * typ) list -> bool
 = fun f1 args1 f2 args2 ->
-  let env1 = init_sym_cnt (); gen_senv args1 empty_env in
-  let r1 = sym_eval f1 env1 default_path_cond in
-  let env2 = init_sym_cnt (); gen_senv args2 empty_env in
-  let r2 = sym_eval f2 env2 default_path_cond in
-  let ctx = Z3_translator.new_ctx () in
-  let solver = Z3.Solver.mk_solver ctx None in
-  solve ctx solver r1 r2
+    let env1 = init_sym_cnt (); gen_senv args1 empty_env in
+    let r1 = sym_eval f1 env1 default_path_cond in
+    let env2 = init_sym_cnt (); gen_senv args2 empty_env in
+    let r2 = sym_eval f2 env2 default_path_cond in
+    let ctx = Z3_translator.new_ctx () in
+    let solver = Z3.Solver.mk_solver ctx None in
+    solve ctx solver r1 r2
 
 (* simple symbolic eval *)
 let run : program -> unit

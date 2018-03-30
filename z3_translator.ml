@@ -9,11 +9,13 @@ let new_ctx () = mk_context []
 (* sort *)
 let int_sort ctx = Z3.Arithmetic.Integer.mk_sort ctx
 let bool_sort ctx = Z3.Boolean.mk_sort ctx
+let string_sort ctx = Z3.Seq.mk_string_sort ctx
 
 (* var *)
 let mk_symbol ctx str = Symbol.mk_string ctx str
 let mk_const ctx str sort = Z3.Expr.mk_const_s ctx str sort
 let const_n ctx n = Z3.Expr.mk_numeral_int ctx n (int_sort ctx)
+let const_str ctx str = mk_const ctx str (string_sort ctx)
 let const_b ctx b = Z3.Boolean.mk_val ctx b
 
 (* aop *)
@@ -64,7 +66,7 @@ let rec val2expr_aux : context -> sym_value -> Expr.expr
       | [] -> val2expr_aux ctx (Int 1)
       | hd::tl -> mul ctx (val2expr_aux ctx hd) (val2expr_aux ctx (Product tl))
     end
-  | Fun _ | FunRec _ | SVar _ | SFun _ | SFunApp _ | EoR _ | Error _ -> raise NotComputableValue
+  | Error _ | Fun _ | FunRec _ | SVar _ | SFun _ | SFunApp _ -> raise NotComputableValue
 
 let val2expr : sym_value -> Expr.expr
 = fun v -> val2expr_aux (new_ctx ()) v

@@ -8,6 +8,26 @@ open Z3.Proof
 open Z3enums
 
 exception CannotCompare
+exception ConvertFailure
+
+let res2int v =
+  match v with
+  | Bool b -> if b then Int 1 else Int 0
+  | Error e ->
+    begin
+      match e with
+      | DIVBYZERO -> Int 10
+      | RECURSION f -> Int 11 (* TODO *)
+    end
+  | _ -> raise ConvertFailure
+
+let int2res v = let Int n = v in
+  match n with
+  | 0 -> Bool false
+  | 1 -> Bool true
+  | 10 -> Error DIVBYZERO
+  | 11 -> Error (RECURSION "") (* TODO *)
+  | _ -> raise ConvertFailure
 
 let rec find_sym_var : sym_env-> var -> sym_env =
   fun senv x ->
@@ -27,7 +47,7 @@ let rec gen_senv : (var * typ) list -> sym_env -> sym_env
       | TyBool -> append r (x, SBool (new_sym ()))
       | TyFun (t1, t2) -> append r (x, SFun (new_sym (), t1, t2))
       | TyVar t -> find_sym_var r x
-    end in
+    end in 
     gen_senv tl r
 
 let sat_check : path_cond -> bool
@@ -43,14 +63,7 @@ let sat_check : path_cond -> bool
 
 let rec solve : context -> solver -> (sym_value * path_cond) list -> (sym_value * path_cond) list -> bool
 = fun ctx solver l1 l2 ->
-  let r = 
-    match l1 with
-    | [] -> raise (Failure "NotRunnable")
-    | hd::tl -> let (v, _) = hd in Z3_translator.mk_const ctx "return" (
-        if is_int v then Z3_translator.int_sort ctx
-        else Z3_translator.bool_sort ctx
-      )
-  in
+  let r = Z3_translator.mk_const ctx "return" (Z3_translator.int_sort ctx) in
   let e1 = fold (
     fun tup rst ->
     let (v, pi) = tup in

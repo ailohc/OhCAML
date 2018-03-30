@@ -63,8 +63,7 @@ type sym_value =
   | SMinus of sym_value
   | SFunApp of id * sym_value * typ
   (* error *)
-  | EoR of var (* end of recursive *)
-  | Error of string
+  | Error of error_code
   (* simplify *)
   | Sum of sym_value list
   | Product of sym_value list
@@ -73,6 +72,9 @@ type sym_value =
 and arithmetic_op = SADD | SSUB | SMUL | SDIV
 and id = int
 and sym_env = (var * sym_value) list
+and error_code =
+  | DIVBYZERO
+  | RECURSION of var
 
 let recursive_cnt = 5
 
@@ -90,6 +92,11 @@ let append env (x, v) = (x, v)::env
 let is_int v =
   match v with
   | Int _ | SInt _ | SExp _ | SMinus _  | Sum _ | Product _ -> true
+  | _ -> false
+
+let is_error v =
+  match v with
+  | Error _ -> true
   | _ -> false
 
 let rec value2str : sym_value -> string
@@ -113,8 +120,11 @@ let rec value2str : sym_value -> string
     end
   | SMinus v -> "(-" ^ value2str v ^ ")"
   | SFunApp (id, v, t) -> "Sym_fun" ^ string_of_int id ^ "(" ^ value2str v ^ ")"
-  | EoR f -> "Can't eval: fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
-  | Error s -> "Error: " ^ s
+  | Error t -> "Error: " ^ (
+    match t with
+    | DIVBYZERO -> "/ by zero"
+    | RECURSION f -> "fun " ^ f ^ " called more than " ^ string_of_int recursive_cnt ^ " times recursively"
+  )
   | Sum l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " + ") ^ s2) l ")"
   | Product l -> "(" ^ fold (fun v1 s2 -> value2str v1 ^ (if s2 = ")" then "" else " * ") ^ s2) l ")"
   | Return -> "expected output"
