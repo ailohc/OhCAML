@@ -3,6 +3,7 @@
 OhCAML is Checking Assistant for ML
 
 ## Install Package
+Install package with opam
 ```
 $ opam install z3
 ```
@@ -16,7 +17,7 @@ $ ./build
 ```
 Usage: main.native <options> <file>
 
-options description
+<options description>
 --help                help
 --run <file>          print result of symbolic execution
 --criteria <file>     compare with 'target' file
