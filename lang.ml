@@ -41,10 +41,12 @@ type arg =
   | ArgTuple of arg list
 
 type decl = 
-  | DException of ctor
-  | Equn of id * typ
+  | DExcept of ctor
+  | DEqn of id * typ
   | DData of id * ctor list
   | DLet of binding
+  | DBlock of bool * binding list
+  | TBlock of decl list
 and exp =
   (* const *)
   | EUnit
@@ -54,7 +56,7 @@ and exp =
   | EList of exp list
   | String of id
   | EVar of id
-  | Ector of id * exp list
+  | ECtor of id * exp list
   | ETuple of exp list
   (* aop *)
   | ADD of exp * exp    (* a1 + a2 *)
@@ -94,16 +96,16 @@ type prog = decl list
 (* semantics *)
 type sym_value =
   (* value *)
-  | Unit
-  | Int of int
-  | String of string
-  | Bool of bool
-  | List of sym_value list
-  | Tuple of sym_value list
-  | Ctor of id * sym_value list
-  | Fun of arg * exp * env
-  | FunRec of id * arg * exp * env
-  | Block of id * (id * sym_value) list
+  | VUnit
+  | VInt of int
+  | VString of string
+  | VBool of bool
+  | VList of sym_value list
+  | VTuple of sym_value list
+  | VCtor of id * sym_value list
+  | VFun of arg * exp * env
+  | VFunRec of id * arg * exp * env
+  | VBlock of id * (id * sym_value) list
   (* symbol *)
   | SInt of id
   | SBool of id
@@ -141,6 +143,9 @@ type path_exp =
 and path_cond = path_exp
 
 exception EExcept of sym_value
+
+type example = (exp list * sym_value)
+type examples = (exp list * sym_value) list
 
 let empty_env = BatMap.empty
 let lookup_env = BatMap.find
@@ -183,15 +188,15 @@ let rec typ2str : typ -> string
 let rec val2str : sym_value -> string
 = fun v ->
   match v with
-  | Unit -> "()"
-  | Int n -> string_of_int n
-  | String str -> "\"" ^ str ^ "\""
-  | Bool b -> string_of_bool b
-  | List l -> string_of_strlist "[" "; " "]" (map val2str l)
-  | Tuple l -> string_of_strlist "(" ", " ")" (map val2str l)
-  | Ctor (id, l) -> raise (Failure "not implemented")
-  | Fun (arg, _, _) | FunRec (_, arg, _, _) -> raise (Failure "not implemented")
-  | Block _ -> raise (Failure "not implemented")
+  | VUnit -> "()"
+  | VInt n -> string_of_int n
+  | VString str -> "\"" ^ str ^ "\""
+  | VBool b -> string_of_bool b
+  | VList l -> string_of_strlist "[" "; " "]" (map val2str l)
+  | VTuple l -> string_of_strlist "(" ", " ")" (map val2str l)
+  | VCtor (id, l) -> raise (Failure "not implemented")
+  | VFun (arg, _, _) | VFunRec (_, arg, _, _) -> raise (Failure "not implemented")
+  | VBlock _ -> raise (Failure "not implemented")
   | SInt id -> "alpha " ^ id
   | SBool id -> "beta " ^ id
   | SAdd (v1, v2) -> "(" ^ val2str v1 ^ " + " ^ val2str v2 ^ ")"

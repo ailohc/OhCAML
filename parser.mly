@@ -455,8 +455,6 @@ exp_base:
     { e }
   | BEGIN e=exp END
     { e }
-  | HOLE
-    { Lang.gen_hole() }
   | LISTHD
     { (EVar "__list_hd__") }
   | LISTTL
