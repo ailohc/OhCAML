@@ -174,11 +174,7 @@ let rec typ2str : typ -> string
   | TString -> "string"
   | TBase id -> raise (Failure "not implement")
   | TList typ -> typ2str typ ^ " list"
-  | TTuple typ_list ->
-  begin
-    let str_list = map typ2str typ_list in
-    string_of_list "(" ")" " * " str_list
-  end
+  | TTuple typ_list -> string_of_strlist "(" " * " ")" (map typ2str typ_list)
   | TCtor (typ, typ_list) -> raise (Failure "not implement")
   | TArr (typ1, typ2) -> raise (Failure "not implement")
   | TVar id -> raise (Failure "not implement")
@@ -191,8 +187,8 @@ let rec val2str : sym_value -> string
   | Int n -> string_of_int n
   | String str -> "\"" ^ str ^ "\""
   | Bool b -> string_of_bool b
-  | List l -> raise (Failure "not implemented")
-  | Tuple l -> raise (Failure "not implemented")
+  | List l -> string_of_strlist "[" "; " "]" (map val2str l)
+  | Tuple l -> string_of_strlist "(" ", " ")" (map val2str l)
   | Ctor (id, l) -> raise (Failure "not implemented")
   | Fun (arg, _, _) | FunRec (_, arg, _, _) -> raise (Failure "not implemented")
   | Block _ -> raise (Failure "not implemented")
